@@ -1051,6 +1051,11 @@ app.post('/api/cart/sync', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`AURA owner API listening on http://localhost:${PORT}`);
-});
+// Conditionally listen on port (only if not running as serverless function on Vercel)
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`AURA owner API listening on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
