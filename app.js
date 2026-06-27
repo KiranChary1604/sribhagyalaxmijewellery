@@ -283,9 +283,12 @@ const initApp = async () => {
     updateUserUI();
     setupEventListeners();
 
-    // Initialize Live Gold Rate updates
-    updateGoldRate();
-    setInterval(updateGoldRate, 1000);
+    // Initialize Live Gold Rate updates (server poll every 5 min, tick update every 1 sec)
+    updateGoldRate().then(() => {
+        tickRates();
+    });
+    setInterval(updateGoldRate, 300000); // Poll server every 5 minutes
+    setInterval(tickRates, 1000);        // Animate local ticker every 1 second
 
     // Setup periodic 5-minute login reminder for guest users
     setInterval(() => {
@@ -363,25 +366,71 @@ function getProductPrice(product, rates) {
     return Math.round(product.price || 0);
 }
 
+// Base rates cache for client-side ticker simulation
+let baseRates = {
+    goldRate: 7350.00, // Realistic fallback rate per gram (INR)
+    goldChange: 0.50,
+    goldUnit: 'g',
+    silverRate: 88500.00, // Realistic fallback rate per kg (INR)
+    silverChange: -0.20,
+    silverUnit: 'kg'
+};
+
 // Fetch and update the gold & silver rates dynamically
 async function updateGoldRate() {
     try {
         const res = await fetch('/api/gold-rate');
         if (!res.ok) throw new Error('API request failed');
         const data = await res.json();
-        setBullionRates(data);
+        
+        // Update base rates cache
+        baseRates.goldRate = parseFloat(data.goldRate) || 7350.00;
+        baseRates.goldChange = parseFloat(data.goldChange) || 0.50;
+        baseRates.goldUnit = data.goldUnit || 'g';
+        baseRates.silverRate = parseFloat(data.silverRate) || 88500.00;
+        baseRates.silverChange = parseFloat(data.silverChange) || -0.20;
+        baseRates.silverUnit = data.silverUnit || 'kg';
+        
+        // Force an immediate ticker update
+        tickRates();
     } catch (err) {
         console.error("Failed to load gold & silver rate from server:", err);
-        // Fallback placeholders     
-        setBullionRates({
-            goldRate: 15694.00,
-            goldChange: 0.00,
-            goldUnit: 'g',
-            silverRate: 253496.00,
-            silverChange: 0.00,
-            silverUnit: 'kg'
-        });
+        // Load fallback values into the cache
+        baseRates.goldRate = 7350.00;
+        baseRates.goldChange = 0.50;
+        baseRates.silverRate = 88500.00;
+        baseRates.silverChange = -0.20;
+        tickRates();
     }
+}
+
+// Client-side ticker simulator to animate micro-fluctuations every second
+function tickRates() {
+    // If state is still 'Loading...' and we haven't fetched fallback/live rates yet, let it load
+    const currentRates = getBullionRates();
+    if (baseRates.goldRate === 7350.00 && currentRates && currentRates.goldRate === 'Loading...') {
+        // Return if not initialized
+        return;
+    }
+    
+    const timeSec = Date.now() / 1000;
+    // Simulate micro-ticks exactly like the server
+    const cycleGold = Math.sin(timeSec * 0.2) * 0.45;
+    const noiseGold = (Math.random() - 0.5) * 0.12;
+    const currentGoldRate = baseRates.goldRate + cycleGold + noiseGold;
+    
+    const cycleSilver = Math.sin(timeSec * 0.15) * 12.5;
+    const noiseSilver = (Math.random() - 0.5) * 3.5;
+    const currentSilverRate = baseRates.silverRate + cycleSilver + noiseSilver;
+    
+    setBullionRates({
+        goldRate: currentGoldRate.toFixed(2),
+        goldChange: baseRates.goldChange.toFixed(2),
+        goldUnit: baseRates.goldUnit,
+        silverRate: currentSilverRate.toFixed(2),
+        silverChange: baseRates.silverChange.toFixed(2),
+        silverUnit: baseRates.silverUnit
+    });
 }
 
 // Render dynamic rates to DOM based on state updates

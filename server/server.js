@@ -122,6 +122,23 @@ function requireAuth(req, res, next) {
 // Initialise DB on server start
 init().catch(err => console.error("Failed to initialize database connection:", err));
 
+// Helper for fetching with a timeout to avoid hanging serverless functions
+async function fetchWithTimeout(url, options = {}, timeout = 4000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
+  }
+}
+
 // ---------- API ROUTES ---------- //
 // Live Gold & Silver Rates API (fetching XAU & XAG price, converting to INR and adding domestic tax/duties)
 app.get('/api/gold-rate', async (req, res) => {
@@ -132,8 +149,8 @@ app.get('/api/gold-rate', async (req, res) => {
 
   try {
     const [goldRes, silverRes] = await Promise.all([
-      fetch('https://api.gold-api.com/price/XAU'),
-      fetch('https://api.gold-api.com/price/XAG')
+      fetchWithTimeout('https://api.gold-api.com/price/XAU', {}, 4000),
+      fetchWithTimeout('https://api.gold-api.com/price/XAG', {}, 4000)
     ]);
 
     if (!goldRes.ok || !silverRes.ok) {
@@ -146,7 +163,7 @@ app.get('/api/gold-rate', async (req, res) => {
     // Fetch live USDINR rate from dynamic exchange rates API
     let usdINR = 95.38; // fallback exchange rate
     try {
-      const exResponse = await fetch('https://open.er-api.com/v6/latest/USD');
+      const exResponse = await fetchWithTimeout('https://open.er-api.com/v6/latest/USD', {}, 3000);
       if (exResponse.ok) {
         const exData = await exResponse.json();
         if (exData && exData.rates && exData.rates.INR) {
@@ -206,7 +223,7 @@ app.get('/api/gold-rate', async (req, res) => {
     // Fallback simulated rates in INR
     let usdINR = 95.38;
     try {
-      const exResponse = await fetch('https://open.er-api.com/v6/latest/USD');
+      const exResponse = await fetchWithTimeout('https://open.er-api.com/v6/latest/USD', {}, 3000);
       if (exResponse.ok) {
         const exData = await exResponse.json();
         if (exData && exData.rates && exData.rates.INR) {
