@@ -262,18 +262,39 @@ img {
 }
 
 .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     font-family: var(--primary-font);
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 500;
-    letter-spacing: 0.3em;
+    letter-spacing: 0.25em;
     color: var(--color-text-dark);
+    text-decoration: none;
     transition: var(--transition-smooth);
     position: relative;
     z-index: 10;
 }
 
+.logo-img {
+    height: 50px;
+    width: 50px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid var(--color-accent-gold);
+    background-color: #fff;
+    transition: var(--transition-smooth);
+    flex-shrink: 0;
+}
+
 .logo:hover {
     color: var(--color-accent-gold);
+}
+
+.logo:hover .logo-img {
+    transform: scale(1.06) rotate(5deg);
+    box-shadow: 0 0 12px rgba(197, 160, 89, 0.4);
+    border-color: var(--color-accent-gold-hover);
 }
 
 .nav-menu {
@@ -1420,12 +1441,38 @@ img {
 }
 
 .footer-about .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     font-family: var(--primary-font);
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 500;
-    letter-spacing: 0.3em;
-    display: inline-block;
+    letter-spacing: 0.25em;
+    color: var(--color-text-light);
+    text-decoration: none;
     margin-bottom: 1.5rem;
+    transition: var(--transition-smooth);
+}
+
+.footer-logo-img {
+    height: 55px;
+    width: 55px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid var(--color-accent-gold);
+    background-color: #000;
+    transition: var(--transition-smooth);
+    flex-shrink: 0;
+}
+
+.footer-about .footer-logo:hover {
+    color: var(--color-accent-gold);
+}
+
+.footer-about .footer-logo:hover .footer-logo-img {
+    transform: scale(1.06) rotate(-5deg);
+    box-shadow: 0 0 15px rgba(197, 160, 89, 0.5);
+    border-color: var(--color-accent-gold-hover);
 }
 
 .footer-about p {
@@ -3820,4 +3867,45 @@ img {
     .legal-content {
         padding: 2rem 1.5rem;
     }
+}
+
+/* Owner Dashboard & Portal Logo Styles */
+.dashboard-logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-logo-img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--color-accent-gold);
+    background-color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    transition: var(--transition-smooth);
+}
+
+.dashboard-logo-img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(197, 160, 89, 0.3);
+}
+
+.dashboard-header-logo-img {
+    width: 45px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid var(--color-accent-gold);
+    background-color: #fff;
+    margin-right: 0.75rem;
+    vertical-align: middle;
+    transition: var(--transition-smooth);
+}
+
+.dashboard-header-logo-img:hover {
+    transform: scale(1.05);
 }
