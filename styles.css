@@ -2350,6 +2350,9 @@ img {
 /* Owner Table Design */
 .owner-table-wrapper {
     margin-bottom: 2.5rem;
+    overflow-x: auto;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
 }
 
 .owner-table-wrapper h3,
