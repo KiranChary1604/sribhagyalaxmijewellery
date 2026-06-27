@@ -175,10 +175,11 @@
                 <div class="footer-newsletter">
                     <h3>Join the Journal</h3>
                     <p>Subscribe to receive preview collections, exclusive exhibition invitations, and artisanal insights.</p>
-                    <form class="newsletter-form" id="newsletterForm" action="index.html#contact">
+                    <form class="newsletter-form" id="newsletterForm">
                         <input type="email" placeholder="Your email address" required id="newsletterEmail">
                         <button type="submit" title="Subscribe"><i class="fa-solid fa-arrow-right-long"></i></button>
                     </form>
+                    <span class="newsletter-success" id="newsletterSuccess">Thank you for subscribing to our journal.</span>
                 </div>
             </div>
         </div>
@@ -280,6 +281,25 @@
             document.getElementById('searchBtn').addEventListener('click', () => {
                 window.location.href = 'index.html?action=search';
             });
+
+            // Newsletter Form Submit
+            const newsletterForm = document.getElementById('newsletterForm');
+            const newsletterSuccess = document.getElementById('newsletterSuccess');
+            if (newsletterForm && newsletterSuccess) {
+                newsletterForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('newsletterEmail').value;
+                    newsletterForm.style.display = 'none';
+                    newsletterSuccess.style.display = 'block';
+
+                    // Post log to backend
+                    fetch('/api/logs', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: `Newsletter subscriber registered from Privacy: ${email}.`, type: "success" })
+                    }).catch(err => console.error("Failed to send log to server:", err));
+                });
+            }
         });
     </script>
 </body>
