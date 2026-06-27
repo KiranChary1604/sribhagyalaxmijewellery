@@ -2108,4 +2108,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Expose functions to window for module mode inline event handlers
+window.openProductModal = openProductModal;
+window.addToCart = addToCart;
+window.updateCartQuantity = updateCartQuantity;
+window.removeFromCart = removeFromCart;
+
 
