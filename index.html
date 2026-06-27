@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRI BHAGYA LAXMI JEWELLERY | Fine Luxury Jewellery</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- GSAP for Entrance Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="header-container">
+            <a href="#" class="logo">SBL</a>
+
+            <nav class="nav-menu" id="navMenu">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#collections" class="nav-link">Collections</a>
+                <a href="#shop" class="nav-link">Shop</a>
+                <a href="#craftsmanship" class="nav-link">Craftsmanship</a>
+                <a href="#appointment" class="nav-link">Book Consultation</a>
+                <a href="#contact" class="nav-link">Help & Contact</a>
+            </nav>
+
+            <div class="header-actions">
+                <button class="gold-rate-btn" id="goldRateToggleBtn"
+                    title="Live 24K Gold Rate - Click to view trend details">
+                    <i class="fa-solid fa-coins"></i>
+                </button>
+                <div class="gold-rate-dropdown" id="goldRateDropdown">
+                    <div class="gold-rate-dropdown-header">
+                        <h4>Live Rates</h4>
+                        <span class="gold-pulse"></span>
+                    </div>
+                    <div class="gold-rate-dropdown-body">
+                        <!-- Gold Row -->
+                        <div class="gold-rate-row">
+                            <span class="gold-purity-tag">Gold 24K</span>
+                            <span class="gold-price-val" id="navbarGoldPrice">Loading...</span>
+                        </div>
+                        <div class="gold-rate-row">
+                            <span class="gold-rate-label-text">Gold Trend</span>
+                            <span class="gold-rate-change" id="navbarGoldChange">...</span>
+                        </div>
+
+                        <div class="divider-small" style="border-top: 1px dashed #ede8e0; margin: 0.5rem 0;"></div>
+
+                        <!-- Silver Row -->
+                        <div class="gold-rate-row">
+                            <span class="gold-purity-tag"
+                                style="background-color: #f1f3f5; color: #495057; border: 1px solid #dee2e6;">Silver
+                                999</span>
+                            <span class="gold-price-val" id="navbarSilverPrice">Loading...</span>
+                        </div>
+                        <div class="gold-rate-row">
+                            <span class="gold-rate-label-text">Silver Trend</span>
+                            <span class="gold-rate-change" id="navbarSilverChange">...</span>
+                        </div>
+
+                        <!-- Bullion Price Estimator -->
+                        <div class="divider-small" style="border-top: 1px dashed #ede8e0; margin: 0.5rem 0;"></div>
+                        <div class="gold-calculator">
+                            <h5>Price Estimator</h5>
+                            <div class="calc-row">
+                                <select id="calcMetal" class="calc-select">
+                                    <option value="gold">Gold 24K</option>
+                                    <option value="silver">Silver 999</option>
+                                </select>
+                                <div class="calc-input-wrapper">
+                                    <input type="number" id="calcWeight" min="0.1" step="0.1" value="10"
+                                        placeholder="Weight">
+                                    <span id="calcWeightUnit">g</span>
+                                </div>
+                            </div>
+                            <div class="calc-result">
+                                <span>Est. Value:</span>
+                                <strong id="calcEstPrice">Loading...</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gold-rate-dropdown-footer">
+                        <p>Rates update dynamically every second.</p>
+                    </div>
+                </div>
+
+                <button class="action-btn" id="searchBtn" title="Search"><i
+                        class="fa-solid fa-magnifying-glass"></i></button>
+                <button class="action-btn" id="accountToggleBtn" title="My Account"><i
+                        class="fa-regular fa-user"></i></button>
+                <button class="action-btn" id="cartToggleBtn" title="Showroom Selection">
+                    <i class="fa-solid fa-gem"></i>
+                    <span class="badge" id="cartBadge">0</span>
+                </button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" title="Menu"><i
+                        class="fa-solid fa-bars"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search Overlay -->
+    <div class="search-overlay" id="searchOverlay">
+        <button class="close-overlay-btn" id="closeSearchBtn"><i class="fa-solid fa-xmark"></i></button>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search our collections..." autocomplete="off">
+            <div class="search-underline"></div>
+            <p class="search-hint">Press Enter to search, or Esc to close.</p>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-bg"
+            style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.75)), url('assets/hero_bg.png');">
+        </div>
+        <div class="hero-content">
+            <span class="hero-subtitle">Meticulously Handcrafted Luxury</span>
+            <h1 class="hero-title">Timeless Elegance,<br>Sculpted in Gold & Diamonds.</h1>
+            <p class="hero-desc">Discover exquisite necklaces, rings, and bracelets crafted by master artisans to
+                elevate your finest moments.</p>
+            <div class="hero-ctas">
+                <a href="#shop" class="btn btn-primary">Discover the Shop</a>
+                <a href="#collections" class="btn btn-secondary">Explore Collections</a>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <a href="#collections"><i class="fa-solid fa-chevron-down animate-bounce"></i></a>
+        </div>
+    </section>
+
+    <!-- Brand Values -->
+    <section class="values-section">
+        <div class="container">
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon"><i class="fa-solid fa-gem"></i></div>
+                    <h3>Ethically Sourced</h3>
+                    <p>All Jewellery are certified and responsibly sourced following international
+                        standards.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                    <h3>Designs</h3>
+                    <p>Work directly with our master jewellers to design a unique, personalized piece.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h3>Lifetime Warranty</h3>
+                    <p>Each purchase comes with our signature warranty, including annual sizing, cleaning, and
+                        appraisal.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Collections Section -->
+    <section class="collections-section" id="collections">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tagline">Curated Themes</span>
+                <h2 class="section-title">Shop by Collection</h2>
+                <div class="divider"></div>
+            </div>
+            <div class="collections-grid" id="collectionsGrid">
+                <!-- Dynamically loaded collections will appear here -->
+            </div>
+            <div class="collections-action-container" id="collectionsActionContainer" style="text-align: center; margin-top: 2.5rem; display: none;">
+                <button class="btn btn-secondary" id="btnToggleCollections" style="min-width: 200px; padding: 0.85rem 2rem;">
+                    More Collections <i class="fa-solid fa-chevron-down" style="margin-left: 0.5rem; font-size: 0.8rem;"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Shop / Interactive Catalog Section -->
+    <section class="shop-section" id="shop">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tagline">The Catalog</span>
+                <h2 class="section-title">Explore Our Creations</h2>
+                <div class="divider"></div>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="catalog-controls">
+                <div class="filter-sidebar-trigger-container">
+                    <button class="btn btn-secondary filter-toggle-btn" id="filterToggleBtn">
+                        <i class="fa-solid fa-sliders"></i> Filter & Sort
+                    </button>
+                    <div class="active-filters-row" id="activeFiltersRow">
+                        <!-- Dynamically filled -->
+                    </div>
+                </div>
+
+                <div class="catalog-layout">
+                    <!-- Sidebar Filters -->
+                    <aside class="filters-sidebar" id="filtersSidebar">
+                        <div class="sidebar-header">
+                            <h3>Filters</h3>
+                            <button id="closeFiltersBtn" class="close-filters-btn"><i
+                                    class="fa-solid fa-xmark"></i></button>
+                        </div>
+
+                        <div class="filter-group">
+                            <h4>Category</h4>
+                            <div class="filter-options">
+                                <label class="radio-label">
+                                    <input type="radio" name="category" value="all" checked>
+                                    <span class="custom-radio"></span> All Pieces
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="category" value="Rings">
+                                    <span class="custom-radio"></span> Rings
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="category" value="Necklaces">
+                                    <span class="custom-radio"></span> Necklaces
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="category" value="Earrings">
+                                    <span class="custom-radio"></span> Earrings
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="category" value="Bracelets">
+                                    <span class="custom-radio"></span> Bracelets
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="category" value="Bangles">
+                                    <span class="custom-radio"></span> Bangles
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <h4>Material / Metal</h4>
+                            <div class="filter-options">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="material" value="Yellow Gold">
+                                    <span class="custom-checkbox"></span> Yellow Gold
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="material" value="White Gold">
+                                    <span class="custom-checkbox"></span> Silver
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="material" value="Platinum">
+                                    <span class="custom-checkbox"></span> Platinum
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <h4>Max Price</h4>
+                            <div class="price-slider-container">
+                                <input type="range" id="priceRange" min="50000" max="1500000" step="50000"
+                                    value="1500000">
+                                <div class="price-values">
+                                    <span>₹50,000</span>
+                                    <span id="priceVal">₹15,00,000</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <h4>Sort By</h4>
+                            <select id="sortBy" class="select-input">
+                                <option value="default">Featured</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-secondary w-full" id="clearFiltersBtn">Reset Filters</button>
+                    </aside>
+
+                    <!-- Product Grid -->
+                    <div class="products-container">
+                        <div class="products-grid" id="productsGrid">
+                            <!-- JS Dynamically populates here -->
+                        </div>
+
+                        <!-- View More Button -->
+                        <div class="view-more-container" id="viewMoreContainer"
+                            style="display: none; text-align: center; margin-top: 3rem;">
+                            <button class="btn btn-secondary" id="viewMoreBtn">View More Creations</button>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div class="empty-state" id="emptyState" style="display: none;">
+                            <i class="fa-solid fa-gem empty-icon"></i>
+                            <h3>No matching items found</h3>
+                            <p>Try resetting the filters or modifying your search query.</p>
+                            <button class="btn btn-primary" id="resetEmptyFiltersBtn">Reset All Filters</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Craftsmanship Section -->
+    <section class="craftsmanship-section" id="craftsmanship">
+        <div class="craftsmanship-container">
+            <div class="craftsmanship-text">
+                <span class="craftsmanship-tagline">Artisanal Heritage</span>
+                <h2>The Art of Master Craftsmanship</h2>
+                <div class="divider text-left"></div>
+                <p>Every piece in the SRI BHAGYA LAXMI JEWELLERY collection begins its life as a hand-drawn sketch,
+                    conceptualized by our
+                    award-winning designers in our private studio. Our master jewellers then select each gemstone
+                    individually, ensuring unparalleled color, clarity, and fire.</p>
+                <p>Using centuries-old bench techniques combined with modern state-of-the-art precision tools, we refine
+                    each metal claw, align each diamond pavé, and polish each facet to create a piece that isn't just
+                    jewellery—it is a sculpture, a legacy, and a treasure to be passed down through generations.</p>
+                <div class="craft-metrics">
+                    <div class="metric">
+                        <span class="metric-num">20+</span>
+                        <span class="metric-lbl">Years Experience</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-num">100%</span>
+                        <span class="metric-lbl">Conflict-Free Diamonds</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-num">120+</span>
+                        <span class="metric-lbl">Hours per Piece</span>
+                    </div>
+                </div>
+            </div>
+            <div class="craftsmanship-visual">
+                <div class="card-visual-wrapper">
+                    <img src="assets/diamond_ring.png" alt="Craftsmanship Close up" class="craft-main-img">
+                    <div class="visual-badge">
+                        <i class="fa-solid fa-award"></i>
+                        <span>Certified Premium Quality</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Appointment / Consultation Booking Section -->
+    <section class="appointment-section" id="appointment">
+        <div class="container">
+            <div class="appointment-card">
+                <div class="appointment-form-container">
+                    <div class="section-header text-left">
+                        <span class="section-tagline">Customer Experience</span>
+                        <h2 class="section-title">Schedule a Consultation</h2>
+                        <div class="divider text-left"></div>
+                        <p class="section-desc">Whether you are searching for the perfect engagement ring, designing a
+                            custom jewellery, or wish to view a specific item in person, our consultants are here to
+                            guide you.</p>
+                    </div>
+
+                    <form id="bookingForm" class="booking-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="bookingName">Your Name</label>
+                                <input type="text" id="bookingName" required placeholder="User Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="bookingEmail">Email Address</label>
+                                <input type="email" id="bookingEmail" required placeholder="useremail@example.com">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="bookingPhone">Phone Number</label>
+                                <div class="phone-input-group">
+                                    <select id="bookingCountryCode">
+                                        <option value="+63">+63 (PH)</option>
+                                        <option value="+91" selected>+91 (IN)</option>
+                                        <option value="+1">+1 (US)</option>
+                                        <option value="+5">+5 (th)</option>
+                                        <option value="+44">+44 (UK)</option>
+                                    </select>
+                                    <input type="tel" id="bookingPhone" required pattern="[0-9]{10}" maxlength="10"
+                                        placeholder="9876543210">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookingService">Interested In</label>
+                                <select id="bookingService" class="select-input">
+                                    <option value="Custom Design">Custom Design & SBL Jewelry</option>
+                                    <option value="Engagement Ring Consultation">Engagement Ring Styling</option>
+                                    <option value="Private Showroom Viewing">Private Showroom Viewing</option>
+                                    <option value="Jewelry Appraisals & Care">Restoration & Appraisal</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="bookingDate">Preferred Date</label>
+                                <input type="date" id="bookingDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookingTime">Preferred Time</label>
+                                <select id="bookingTime" class="select-input">
+                                    <option value="Morning">Morning (10:00 AM - 12:30 PM)</option>
+                                    <option value="Afternoon">Afternoon (1:00 PM - 4:30 PM)</option>
+                                    <option value="Evening">Evening (5:00 PM - 7:30 PM)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookingNotes">Notes or Special Requests</label>
+                            <textarea id="bookingNotes" rows="3"
+                                placeholder="Please describe any specific styles, gemstone shapes, or specific items you'd like to inspect..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-full">Request Private Viewing</button>
+                    </form>
+
+                    <!-- Success Message -->
+                    <div class="booking-success" id="bookingSuccess">
+                        <i class="fa-solid fa-calendar-check success-icon"></i>
+                        <h3>Consultation Requested</h3>
+                        <p>Thank you, <strong id="successClientName"></strong>. Our manager will reach
+                            out within 24 hours to confirm your private appointment details.</p>
+                        <button class="btn btn-primary" id="bookingWhatsappBtn"
+                            style="margin-top: 1rem; width: 100%; border: 2px solid #25d366; background: #25d366; color: #fff; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <i class="fa-brands fa-whatsapp" style="font-size: 1.2rem;"></i> Contact Consultant on
+                            WhatsApp
+                        </button>
+                        <button class="btn btn-secondary" id="resetBookingBtn" style="margin-top: 0.75rem;">Book Another
+                            Appointment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Help & Contact Section -->
+    <section class="contact-section" id="contact">
+        <div class="container">
+            <div class="section-header text-center">
+                <span class="section-tagline">Client Relations</span>
+                <h2 class="section-title">Help & Contact</h2>
+                <div class="divider text-center"></div>
+                <p class="section-desc">Our dedicated team is at your disposal for guides,
+                    commissions, or jewellery styling services.</p>
+            </div>
+
+            <div class="contact-grid">
+                <!-- Contact Info Card -->
+                <div class="contact-info-card">
+                    <div class="contact-method">
+                        <div class="contact-icon"><i class="fa-solid fa-phone"></i></div>
+                        <div class="contact-details">
+                            <h3>Contact Details</h3>
+                            <p class="contact-text">+91 99494 26288</p>
+                            <p class="contact-sub">Available Mon-Sat, 9:00 AM - 6:00 PM EST</p>
+                        </div>
+                    </div>
+                    <div class="contact-method">
+                        <div class="contact-icon"><i class="fa-solid fa-envelope"></i></div>
+                        <div class="contact-details">
+                            <h3>Digital Concierge</h3>
+                            <p class="contact-text">sribhagyalaxmijewellery@gmail.com</p>
+                            <p class="contact-sub">We aim to respond to all inquiries within 12 hours</p>
+                        </div>
+                    </div>
+                    <div class="contact-method">
+                        <div class="contact-icon"><i class="fa-solid fa-location-dot"></i></div>
+                        <div class="contact-details">
+                            <h3>Address</h3>
+                            <p class="contact-text">Gulzar House, Hyderabad</p>
+                            <p class="contact-sub">Experience the brilliance in person. Walk-ins welcome.</p>
+                        </div>
+                    </div>
+                    <div class="contact-method">
+                        <div class="contact-icon"><i class="fa-solid fa-clock"></i></div>
+                        <div class="contact-details">
+                            <h3>Maison Hours</h3>
+                            <p class="contact-text">Mon - Fri: 10 AM - 7 PM | Sat: 11 AM - 6 PM</p>
+                            <p class="contact-sub">Sundays: Private Appointments Only</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Accordion -->
+                <div class="faq-accordion-container">
+                    <h3>Frequently Asked Questions</h3>
+                    <div class="faq-accordion">
+                        <div class="faq-item">
+                            <button class="faq-trigger">
+                                <span>Do you offer customer design services?</span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+                            <div class="faq-content">
+                                <p>Yes, SBL specializes in custom commissions. Our design team works directly with you
+                                    to select diamonds, gemstones, and fine metals, turning your vision into a unique
+                                    hand-sculpted masterpiece.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="container footer-grid">
+                <div class="footer-about">
+                    <a href="#" class="footer-logo">S B L</a>
+                    <p>Fine luxury jewelry sculpted with passion, dedicated to celebrating life's most precious
+                        milestones with timeless brilliance.</p>
+                    <div class="social-links">
+                        <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" title="Facebook"><i class="fa-brands fa-facebook"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h3>Collections</h3>
+                    <ul>
+                        <li><a href="#shop" class="filter-link" data-cat="Rings">Rings</a></li>
+                        <li><a href="#shop" class="filter-link" data-cat="Necklaces">Necklaces</a></li>
+                        <li><a href="#shop" class="filter-link" data-cat="Earrings">Earrings</a></li>
+                        <li><a href="#shop" class="filter-link" data-cat="Bracelets">Bracelets</a></li>
+                        <li><a href="#shop" class="filter-link" data-cat="Bangles">Bangles</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>The House</h3>
+                    <ul>
+                        <li><a href="#craftsmanship">Craftsmanship</a></li>
+                        <li><a href="#hero">Our Story</a></li>
+                        <li><a href="#appointment">Private Viewings</a></li>
+                        <li><a href="#">Care & Cleaning</a></li>
+                    </ul>
+                </div>
+                <div class="footer-newsletter">
+                    <h3>Join the Journal</h3>
+                    <p>Subscribe to receive preview collections, exclusive exhibition invitations, and artisanal
+                        insights.</p>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" placeholder="Your email address" required id="newsletterEmail">
+                        <button type="submit" title="Subscribe"><i class="fa-solid fa-arrow-right-long"></i></button>
+                    </form>
+                    <span class="newsletter-success" id="newsletterSuccess">Thank you for subscribing to our
+                        journal.</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container footer-bottom-flex">
+                <p>&copy; 2026 Sri Bhagya Laxmi Jewellers. All rights reserved.</p>
+                <div class="footer-legal-links">
+                    <a href="privacy.html">Privacy Policy</a>
+                    <a href="terms.html">Terms of Service</a>
+                    <a href="#">Cookie Preferences</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Side Drawers -->
+
+    <!-- Selection Drawer -->
+    <div class="drawer-overlay" id="cartOverlay">
+        <div class="drawer" id="cartDrawer">
+            <div class="drawer-header">
+                <h3>Showroom Selection (<span id="cartCount">0</span>)</h3>
+                <button class="close-drawer-btn" id="closeCartBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="drawer-content">
+                <!-- Cart Items Container -->
+                <div class="cart-items" id="cartItems">
+                    <!-- Dynamically populated -->
+                </div>
+
+                <!-- Empty Cart State -->
+                <div class="drawer-empty-state" id="cartEmptyState">
+                    <i class="fa-solid fa-gem" style="font-size: 2.5rem; color: var(--color-accent-gold); margin-bottom: 1rem;"></i>
+                    <p>Your selection list is currently empty.</p>
+                    <a href="#shop" class="btn btn-primary" id="cartExploreBtn">Explore Creations</a>
+                </div>
+            </div>
+
+            <div class="drawer-footer" id="cartFooter">
+                <div class="subtotal-row">
+                    <span>Est. Subtotal</span>
+                    <span id="cartSubtotal">₹0.00</span>
+                </div>
+                <button class="btn btn-primary w-full" id="checkoutBtn" style="gap: 0.5rem;"><i class="fa-solid fa-calendar-days"></i> Book Showroom Viewing</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Product Details Quick View Modal -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal-box">
+            <button class="close-modal-btn" id="closeModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-content-grid" id="modalProductContent">
+                <!-- Dynamically populated with Javascript -->
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Account Login/Register Modal -->
+    <div class="modal-overlay" id="accountModal">
+        <div class="modal-box account-modal-box">
+            <button class="close-modal-btn" id="closeAccountModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="account-modal-content">
+                <!-- Not Logged In View -->
+                <div class="auth-view" id="authView">
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" id="tabLoginBtn" onclick="switchAuthTab('login')">Sign
+                            In</button>
+                        <button class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">Create
+                            Account</button>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form id="loginForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="loginUser">Email or Mobile Number</label>
+                            <input type="text" id="loginUser" required placeholder="email@example.com or +1...">
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" required placeholder="••••••••">
+                            <a href="javascript:void(0)" class="forgot-password-link" id="forgotPasswordLink"
+                                style="display:block; margin-top:0.5rem; font-size:0.85rem; color:var(--color-accent-gold);">Forgot
+                                Password?</a>
+                        </div>
+                        <span id="loginErrorMsg"
+                            style="color: #e25c5c; font-size: 0.8rem; display: none; margin-bottom: 1rem; text-align: center;"></span>
+                        <button type="submit" class="btn btn-primary w-full">Sign In</button>
+                    </form>
+
+                    <!-- Register Form -->
+                    <form id="registerForm" class="auth-form" style="display: none;">
+                        <div class="form-group">
+                            <label for="registerName">Full Name</label>
+                            <input type="text" id="registerName" placeholder="Alexandra Mercer">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">Email Address</label>
+                            <input type="email" id="registerEmail" required placeholder="name@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPhone">Mobile Number</label>
+                            <div class="phone-input-group">
+                                <select id="registerCountryCode">
+                                    <option value="+63">+63 (PH)</option>
+                                    <option value="+91" selected>+91 (IN)</option>
+                                    <option value="+1">+1 (US)</option>
+                                    <option value="+44">+44 (UK)</option>
+                                </select>
+                                <input type="tel" id="registerPhone" required pattern="[0-9]{10}" maxlength="10"
+                                    placeholder="9876543210">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Password</label>
+                            <input type="password" id="registerPassword" required placeholder="••••••••">
+                        </div>
+                        <span id="registerErrorMsg"
+                            style="color: #e25c5c; font-size: 0.8rem; display: none; margin-bottom: 1rem; text-align: center;"></span>
+                        <button type="submit" class="btn btn-primary w-full">Create Account</button>
+                    </form>
+                </div>
+
+                <!-- Forgot Password View -->
+                <div class="auth-view" id="forgotPasswordView" style="display:none;">
+                    <h3 style="margin-bottom:1rem; font-weight:600;">Reset Your Password</h3>
+                    <form id="forgotPasswordForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="forgotUser">Email or Mobile Number</label>
+                            <input type="text" id="forgotUser" required placeholder="email@example.com or +1...">
+                        </div>
+                        <span id="forgotErrorMsg"
+                            style="color:#e25c5c; font-size:0.8rem; display:none; margin-bottom:1rem; text-align:center;"></span>
+                        <button type="submit" class="btn btn-primary w-full">Request Reset Code</button>
+                        <button type="button" class="btn btn-secondary w-full" id="backToLoginFromForgot"
+                            style="margin-top:0.5rem;">Back to Sign In</button>
+                    </form>
+                </div>
+
+                <!-- Reset Password View -->
+                <div class="auth-view" id="resetPasswordView" style="display:none;">
+                    <h3 style="margin-bottom:1rem; font-weight:600;">Enter Reset Code</h3>
+                    <form id="resetPasswordForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="resetCode">6-Digit Code</label>
+                            <input type="text" id="resetCode" required maxlength="6" placeholder="123456">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" required placeholder="••••••••">
+                        </div>
+                        <span id="resetErrorMsg"
+                            style="color:#e25c5c; font-size:0.8rem; display:none; margin-bottom:1rem; text-align:center;"></span>
+                        <button type="submit" class="btn btn-primary w-full">Reset Password</button>
+                        <button type="button" class="btn btn-secondary w-full" id="backToLoginFromReset"
+                            style="margin-top:0.5rem;">Back to Sign In</button>
+                    </form>
+                </div>
+
+                <!-- OTP Verification View -->
+                <div class="otp-view" id="otpView" style="display: none;">
+                    <div class="otp-header" style="text-align: center; margin-bottom: 2rem;">
+                        <i class="fa-solid fa-shield-halved"
+                            style="font-size: 2.5rem; color: var(--color-accent-gold); margin-bottom: 1rem;"></i>
+                        <h3 style="font-family: var(--heading-font); font-size: 1.3rem;">Verify Your Account</h3>
+                        <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 0.5rem;">We have sent
+                            a verification code to your Gmail: <span id="otpTargetPhone"
+                                style="font-weight: 600; color: var(--color-text-dark);"></span>. Enter it below to
+                            complete registration.</p>
+                    </div>
+
+                    <form id="otpForm" class="auth-form">
+                        <div class="form-group" style="text-align: center;">
+                            <label for="otpCode"
+                                style="margin-bottom: 0.75rem; display: block; letter-spacing: 0.05em;">6-Digit
+                                Code</label>
+                            <input type="text" id="otpCode" required maxlength="6" placeholder="0 0 0 0 0 0">
+                            <span id="otpErrorMsg"
+                                style="color: #e25c5c; font-size: 0.8rem; display: none; margin-top: 0.5rem; text-align: center;"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-full" style="margin-top: 1.5rem;">Confirm &
+                            Register</button>
+                    </form>
+
+                    <div style="text-align: center; margin-top: 1.5rem;">
+                        <span style="font-size: 0.8rem; color: var(--color-text-muted);">Didn't receive code?</span>
+                        <button type="button" id="resendOtpBtn"
+                            style="background: none; border: none; font-size: 0.8rem; color: var(--color-accent-gold); text-decoration: underline; font-weight: 500; cursor: pointer; margin-left: 0.25rem;">Resend
+                            Code</button>
+                    </div>
+                </div>
+
+                <!-- Logged In View -->
+                <div class="logged-in-view" id="loggedInView" style="display: none;">
+                    <div class="profile-header">
+                        <div class="profile-avatar" id="profileAvatar">U</div>
+                        <h3 id="profileGreeting">Welcome back, User!</h3>
+                        <p id="profileEmail">user@example.com</p>
+                        <p id="profilePhone"
+                            style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.25rem;">+1...</p>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="profile-actions">
+                        <div id="profileEliteItem" class="elite-member-card-shiny" style="display: none;">
+                            <i class="fa-solid fa-crown"></i>
+                            <span>SBL Elite Member</span>
+                        </div>
+                        <div class="profile-info-item">
+                            <i class="fa-solid fa-box"></i>
+                            <span>No recent orders</span>
+                        </div>
+                        <button class="btn btn-secondary w-full" id="logoutBtn"
+                            style="margin-top: 1.5rem;">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast">
+        <span id="toastMessage">Item added to your selection list</span>
+        <button class="close-toast-btn" id="closeToastBtn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+
+
+    <!-- Floating WhatsApp Button -->
+    <a href="#" class="whatsapp-float-btn whatsapp-glow" id="whatsappFloatBtn" title="Chat on WhatsApp">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <!-- Script file -->
+    <script src="app.js"></script>
+</body>
+
+</html>

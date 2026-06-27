@@ -1,0 +1,202 @@
+{
+  "users": [],
+  "carts": [],
+  "consultations": [],
+  "logs": [
+    {
+      "id": 1,
+      "time": "11:55:30",
+      "text": "Administrator added new product: Gold Ring",
+      "type": "success"
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "name": "Solitaire Diamond Engagement Ring",
+      "category": "Rings",
+      "price": 700000,
+      "material": "Platinum",
+      "image": "assets/diamond_ring.png",
+      "rating": 4.9,
+      "reviews": 28,
+      "details": "A brilliant round-cut 2.0 carat solitaire diamond set on a polished platinum band of timeless beauty and exceptional purity. Excellent cut, color grade F, clarity VS1.",
+      "specs": {
+        "Stone": "Round Brilliant Diamond",
+        "Weight": "2.0 Carat",
+        "Metal": "950 Platinum",
+        "Setting": "4-Prong Classic"
+      },
+      "purity": "950",
+      "weight": "2.0 Carat",
+      "stock": 5,
+      "status": "Active",
+      "isFeatured": true,
+      "isNewArrival": false,
+      "isBestSeller": true,
+      "isTrending": true,
+      "isInStock": true,
+      "images": [
+        "assets/diamond_ring.png"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Yellow Gold Diamond Pendant",
+      "category": "Necklaces",
+      "price": 200000,
+      "material": "Yellow Gold",
+      "image": "assets/gold_necklace.png",
+      "rating": 4.7,
+      "reviews": 14,
+      "details": "A modern 18k yellow gold pendant featuring a delicate bar design with micro-pavé set diamonds suspended on a thin, elegant chain.",
+      "specs": {
+        "Stone": "Pavé Diamonds (0.35 ctw)",
+        "Metal": "18k Yellow Gold",
+        "Length": "18 Inches (adjustable)",
+        "Clasp": "Lobster Clasp"
+      },
+      "purity": "18k",
+      "weight": "0.35 ctw",
+      "stock": 12,
+      "status": "Active",
+      "isFeatured": false,
+      "isNewArrival": true,
+      "isBestSeller": false,
+      "isTrending": false,
+      "isInStock": true,
+      "images": [
+        "assets/gold_necklace.png"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Tahitian Pearl Drop Earrings",
+      "category": "Earrings",
+      "price": 150000,
+      "material": "White Gold",
+      "image": "assets/pearl_earrings.png",
+      "rating": 4.8,
+      "reviews": 19,
+      "details": "Exquisite dark Tahitian pearls (9mm) suspended from micro-pavé encrusted 18k white gold studs. Designed to sway gently with your movement.",
+      "specs": {
+        "Stone": "Tahitian Black Pearls",
+        "Metal": "18k White Gold",
+        "Backing": "Push Back"
+      },
+      "purity": "18k",
+      "weight": "9mm",
+      "stock": 8,
+      "status": "Active",
+      "isFeatured": true,
+      "isNewArrival": true,
+      "isBestSeller": true,
+      "isTrending": false,
+      "isInStock": true,
+      "images": [
+        "assets/pearl_earrings.png"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Emerald & Diamond Tennis Bracelet",
+      "category": "Bracelets",
+      "price": 1000000,
+      "material": "Yellow Gold",
+      "image": "assets/emerald_bracelet.png",
+      "rating": 5,
+      "reviews": 9,
+      "details": "An elite statement bracelet featuring alternating round-cut brilliant diamonds and premium vivid green Zambian emeralds in an 18k yellow gold setting.",
+      "specs": {
+        "Stone": "Emeralds (4.0 ct), Diamonds (3.5 ctw)",
+        "Metal": "18k Yellow Gold",
+        "Length": "7 Inches",
+        "Clasp": "Double-Safety Box Clasp"
+      },
+      "purity": "18k",
+      "weight": "4.0 ct",
+      "stock": 3,
+      "status": "Active",
+      "isFeatured": true,
+      "isNewArrival": false,
+      "isBestSeller": false,
+      "isTrending": true,
+      "isInStock": true,
+      "images": [
+        "assets/emerald_bracelet.png"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Gold Ring",
+      "category": "Rings",
+      "price": 35000,
+      "material": "Gold",
+      "image": "assets/uploads/product_1781850330941_0.webp",
+      "rating": 5,
+      "reviews": 0,
+      "details": "Gold Ring",
+      "specs": {
+        "Metal": "Gold",
+        "Purity": "22k",
+        "Weight": "5"
+      },
+      "purity": "22k",
+      "weight": "5",
+      "stock": 5,
+      "status": "Active",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "isBestSeller": false,
+      "isTrending": false,
+      "isInStock": true,
+      "images": [
+        "assets/uploads/product_1781850330941_0.webp"
+      ]
+    }
+  ],
+  "collections": [
+    {
+      "id": 1,
+      "title": "Eternity Rings",
+      "subtitle": "Brilliant solitaires & diamond eternity bands",
+      "category": "Rings",
+      "image": "assets/diamond_ring.png"
+    },
+    {
+      "id": 3,
+      "title": "Exquisite Earrings",
+      "subtitle": "Pearl drops, studs, and diamond hoops",
+      "category": "Earrings",
+      "image": "assets/pearl_earrings.png"
+    },
+    {
+      "id": 4,
+      "title": "Luxe Bracelets",
+      "subtitle": "Emerald cuffs and sparkling tennis chains",
+      "category": "Bracelets",
+      "image": "assets/emerald_bracelet.png"
+    },
+    {
+      "id": 5,
+      "title": "Special Bridal Sets",
+      "subtitle": "Custom hand-crafted wedding ring sets and matching bands",
+      "category": "Rings",
+      "image": "assets/diamond_ring.png"
+    },
+    {
+      "id": 6,
+      "title": "Royal Emeralds",
+      "subtitle": "Vivid green crowns and cuffs",
+      "category": "Bracelets",
+      "image": "assets/diamond_ring.png"
+    },
+    {
+      "id": 7,
+      "title": "Golden Necklaces",
+      "subtitle": "Elegant chains & chokers",
+      "category": "Necklaces",
+      "image": "assets/diamond_ring.png"
+    }
+  ]
+}

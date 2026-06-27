@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRI BHAGYA LAXMI JEWELLERY | Owner Dashboard Portal</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Shared design system styles -->
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-color: var(--color-bg-light);
+            padding: 2rem 0;
+        }
+
+        .dashboard-container {
+            max-width: 1600px;
+            width: 95%;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .dashboard-card {
+            background-color: var(--color-bg-white);
+            border: var(--border-luxury);
+            border-radius: var(--border-radius-sm);
+            padding: 3rem;
+            box-shadow: var(--box-shadow-premium);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Admin Login Screen -->
+    <div class="admin-login-container" id="adminLoginContainer"
+        style="display: none; max-width: 450px; margin: 6rem auto; padding: 3rem; background: var(--color-bg-white); border: var(--border-luxury); border-radius: var(--border-radius-sm); box-shadow: var(--box-shadow-premium);">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <a href="index.html"
+                style="font-family: var(--heading-font); font-size: 1.8rem; letter-spacing: 0.2em; text-decoration: none; color: var(--color-text-dark); display: block; margin-bottom: 0.5rem;">SRI
+                BHAGYA LAXMI JEWELLERY</a>
+            <h3
+                style="font-family: var(--heading-font); font-size: 1.15rem; font-weight: 500; color: var(--color-accent-gold);">
+                Owner Portal</h3>
+            <p style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.25rem;">Authorized access only.
+                Please sign in with your administrative credentials.</p>
+        </div>
+
+        <form id="adminLoginForm" style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                <label for="adminUser"
+                    style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.1rem; display: block; text-align: left;">Username
+                    or Email</label>
+                <input type="text" id="adminUser" required placeholder="username"
+                    style="width: 100%; padding: 0.75rem; border: 1px solid #ede8e0; border-radius: var(--border-radius-sm);">
+            </div>
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                <label for="adminPassword"
+                    style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.1rem; display: block; text-align: left;">Password</label>
+                <div class="password-input-container">
+                    <input type="password" id="adminPassword" required placeholder="••••••••"
+                        style="width: 100%; padding: 0.75rem; border: 1px solid #ede8e0; border-radius: var(--border-radius-sm);">
+                    <button type="button" class="password-toggle-icon-btn"
+                        onclick="togglePassword('adminPassword', this)" title="Show password">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <span id="adminLoginError"
+                style="color: #e25c5c; font-size: 0.8rem; display: none; text-align: center; margin-top: 0.25rem;"></span>
+
+            <button type="submit" class="btn btn-primary w-full" style="margin-top: 0.75rem;">Access Dashboard</button>
+        </form>
+    </div>
+
+    <div class="dashboard-container" id="adminDashboardContainer" style="display: none;">
+        <!-- Dashboard Card -->
+        <div class="dashboard-card">
+
+            <div class="owner-header"
+                style="border-bottom: 1px solid #ede8e0; padding-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2><i class="fa-solid fa-crown"></i> SRI BHAGYA LAXMI JEWELLERY House Owner Portal</h2>
+                    <p>Live storefront oversight, customer registration records, and active cart analytics.</p>
+                </div>
+                <button class="btn btn-secondary" id="adminLogoutBtn"
+                    style="padding: 0.6rem 1.2rem; font-size: 0.8rem;"><i class="fa-solid fa-right-from-bracket"
+                        style="margin-right: 0.4rem;"></i>Exit Portal</button>
+            </div>
+
+            <!-- Dashboard Navigation Tabs -->
+            <div class="dashboard-tabs">
+                <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')">
+                    <i class="fa-solid fa-chart-line"></i> Overview & Activity
+                </button>
+                <button class="tab-btn" data-tab="inventory" onclick="switchTab('inventory')">
+                    <i class="fa-solid fa-gem"></i> Manage Inventory
+                </button>
+                <button class="tab-btn" data-tab="upload" onclick="switchTab('upload')">
+                    <i class="fa-solid fa-circle-plus"></i> Upload Product
+                </button>
+                <button class="tab-btn" data-tab="clients" onclick="switchTab('clients')">
+                    <i class="fa-solid fa-users"></i> Client Directory
+                </button>
+                <button class="tab-btn" data-tab="collections" onclick="switchTab('collections')">
+                    <i class="fa-solid fa-layer-group"></i> Manage Collections
+                </button>
+            </div>
+
+            <!-- Tab Panel: Overview & Activity -->
+            <div id="tabPanelOverview" class="tab-panel active">
+                <div class="owner-stats-grid" style="margin-top: 0;">
+                    <div class="owner-stat-card">
+                        <span class="stat-label">Total Registered Customers</span>
+                        <span class="stat-value" id="ownerStatUsers">0</span>
+                    </div>
+                    <div class="owner-stat-card">
+                        <span class="stat-label">Active Carts Value</span>
+                        <span class="stat-value" id="ownerStatCartVal">₹0.00</span>
+                    </div>
+                    <div class="owner-stat-card">
+                        <span class="stat-label">Booked Consultations</span>
+                        <span class="stat-value" id="ownerStatConsultations">0</span>
+                    </div>
+                    <div class="owner-stat-card">
+                        <span class="stat-label">Total WhatsApp Inquiries</span>
+                        <span class="stat-value" id="ownerStatWhatsAppTotal">0</span>
+                    </div>
+                </div>
+
+                <!-- Customer Database Table -->
+                <div class="owner-table-wrapper" style="margin-top: 2.5rem;">
+                    <h3 style="display: flex; align-items: center;"><i class="fa-solid fa-database"
+                            style="margin-right: 0.5rem; color: var(--color-accent-gold);"></i>
+                        Customer Activity Database <span class="admin-badge" id="customerActivityCount"
+                            style="margin-left: 0.5rem; background: var(--color-bg-light); border: var(--border-luxury); color: var(--color-accent-gold-hover); font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600;">0</span>
+                    </h3>
+                    <table class="owner-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">S.No</th>
+                                <th>Customer</th>
+                                <th>Contact Information</th>
+                                <th>Cart/Selection Contents & Subtotal</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ownerTableBody">
+                            <!-- Dynamic Table Rows -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Consultations Table -->
+                <div class="owner-table-wrapper" style="margin-top: 2.5rem;">
+                    <h3 style="display: flex; align-items: center;"><i class="fa-solid fa-calendar-check"
+                            style="margin-right: 0.5rem; color: var(--color-accent-gold);"></i> Booked Consultations
+                        <span class="admin-badge" id="bookedConsultationsCount"
+                            style="margin-left: 0.5rem; background: var(--color-bg-light); border: var(--border-luxury); color: var(--color-accent-gold-hover); font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600;">0</span>
+                    </h3>
+                    <table class="owner-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">S.No</th>
+                                <th>Client</th>
+                                <th>Service Requested</th>
+                                <th>Preferred Date & Time</th>
+                                <th>Special Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ownerConsultationsBody">
+                            <!-- Dynamic Table Rows -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Live ACTIVITY FEED logs -->
+                <div class="owner-feed-wrapper" style="margin-top: 2.5rem;">
+                    <h3><i class="fa-solid fa-terminal"
+                            style="margin-right: 0.5rem; color: var(--color-accent-gold);"></i>
+                        Real-Time Customer Activity Feed</h3>
+                    <div class="owner-feed-terminal" id="ownerFeedTerminal">
+                        <!-- Activity items append here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Panel: Manage Inventory -->
+            <div id="tabPanelInventory" class="tab-panel" style="display: none;">
+                <!-- Filters Bar -->
+                <div class="inventory-filters-bar"
+                    style="display: flex; gap: 1rem; flex-wrap: wrap; background: var(--color-bg-light); padding: 1.5rem; border-radius: var(--border-radius-sm); border: var(--border-luxury); margin-bottom: 2rem; align-items: center;">
+                    <div style="flex: 2; min-width: 250px; position: relative;">
+                        <input type="text" id="inventorySearch"
+                            placeholder="Search inventory by name, metal, category..."
+                            style="width: 100%; padding: 0.85rem 1rem; border: var(--border-luxury); border-radius: var(--border-radius-sm); outline: none; background-color: var(--color-bg-white); font-family: inherit;">
+                    </div>
+                    <div style="flex: 1; min-width: 150px;">
+                        <select id="filterCategory" class="select-input"
+                            style="width: 100%; padding: 0.85rem 1.75rem 0.85rem 1rem; background-color: var(--color-bg-white);">
+                            <option value="all">All Categories</option>
+                            <option value="Rings">Rings</option>
+                            <option value="Necklaces">Necklaces</option>
+                            <option value="Earrings">Earrings</option>
+                            <option value="Bracelets">Bracelets</option>
+                            <option value="Bangles">Bangles</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 150px;">
+                        <select id="filterMaterial" class="select-input"
+                            style="width: 100%; padding: 0.85rem 1.75rem 0.85rem 1rem; background-color: var(--color-bg-white);">
+                            <option value="all">All Metal Types</option>
+                            <option value="Platinum">Platinum</option>
+                            <option value="Gold">Gold</option>
+                            <option value="Silver">Silver</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 150px;">
+                        <select id="filterStatus" class="select-input"
+                            style="width: 100%; padding: 0.85rem 1.75rem 0.85rem 1rem; background-color: var(--color-bg-white);">
+                            <option value="all">All Statuses</option>
+                            <option value="Active">Active (Visible)</option>
+                            <option value="Inactive">Inactive (Hidden)</option>
+                            <option value="Out of Stock">Out of Stock</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="owner-table-wrapper" style="margin-top: 0; max-height: 900px; overflow-y: auto;">
+                    <h3 style="margin-bottom: 1rem; display: flex; align-items: center;"><i class="fa-solid fa-gem"
+                            style="margin-right: 0.5rem; color: var(--color-accent-gold);"></i> Storefront Inventory
+                        <span class="admin-badge" id="storefrontInventoryCount"
+                            style="margin-left: 0.5rem; background: var(--color-bg-light); border: var(--border-luxury); color: var(--color-accent-gold-hover); font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600;">0</span>
+                    </h3>
+                    <table class="owner-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">S.No</th>
+                                <th>Product info</th>
+                                <th>Attributes</th>
+                                <th>Price / Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody">
+                            <!-- Dynamic rows of products -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Panel: Upload Product -->
+            <div id="tabPanelUpload" class="tab-panel" style="display: none;">
+                <div class="inventory-form-column" style="max-width: 800px; margin: 0 auto; position: static;">
+                    <div class="inventory-form-header">
+                        <h3 id="formTitleText"><i class="fa-solid fa-circle-plus"
+                                style="color: var(--color-accent-gold);"></i> Upload Product</h3>
+                        <p id="formSubTitleText">Add a new jewellery piece to the public catalog.</p>
+                    </div>
+
+                    <form id="productForm" style="display: flex; flex-direction: column; gap: 1.25rem;">
+                        <!-- Hidden inputs for ID and edit modes -->
+                        <input type="hidden" id="formProductId" value="">
+
+                        <div class="form-group">
+                            <label for="prodName">Product Name</label>
+                            <input type="text" id="prodName" required
+                                placeholder="e.g. Solitaire Diamond Engagement Ring">
+                        </div>
+
+                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label for="prodCategory"
+                                    style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                    <span>Category</span>
+                                </label>
+                                <select id="prodCategory" required class="select-input"
+                                    style="padding: 0.85rem 1.75rem 0.85rem 1rem; width: 100%;">
+                                    <option value="Rings">Rings</option>
+                                    <option value="Necklaces">Necklaces</option>
+                                    <option value="Earrings">Earrings</option>
+                                    <option value="Bracelets">Bracelets</option>
+                                    <option value="Bangles">Bangles</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="prodMaterial">Metal Type</label>
+                                <select id="prodMaterial" required class="select-input"
+                                    style="padding: 0.85rem 1.75rem 0.85rem 1rem;">
+                                    <option value="Platinum">Platinum</option>
+                                    <option value="Gold" selected>Gold</option>
+                                    <option value="Silver">Silver</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label for="prodPurity">Purity</label>
+                                <input type="text" id="prodPurity" required placeholder="e.g. 18k, 950">
+                            </div>
+                            <div class="form-group">
+                                <label for="prodWeight">Weight</label>
+                                <input type="text" id="prodWeight" required placeholder="e.g. 2.0 Carat, 8.5g">
+                            </div>
+                        </div>
+
+                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label for="prodStock">Stock Quantity</label>
+                                <input type="number" id="prodStock" required min="0" placeholder="e.g. 5">
+                            </div>
+                            <div class="form-group">
+                                <label for="prodStatus">Product Status</label>
+                                <select id="prodStatus" required class="select-input"
+                                    style="padding: 0.85rem 1.75rem 0.85rem 1rem;">
+                                    <option value="Active">Active (Visible)</option>
+                                    <option value="Inactive">Inactive (Hidden)</option>
+                                    <option value="Out of Stock">Out of Stock</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="prodDescription">Description</label>
+                            <textarea id="prodDescription" required rows="3"
+                                placeholder="Enter details about stones, setting, and craftsmanship..."></textarea>
+                        </div>
+
+                        <!-- Dynamic Custom Specifications -->
+                        <div class="form-group"
+                            style="border: 1px solid #ede8e0; padding: 1.5rem; border-radius: var(--border-radius-sm); background: var(--color-bg-light); margin-bottom: 0.5rem;">
+                            <label
+                                style="display: flex; justify-content: space-between; align-items: center; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem;">
+                                <span>Custom Specifications / Attributes</span>
+                                <button type="button" class="btn btn-secondary" id="btnAddSpec"
+                                    style="padding: 0.4rem 0.8rem; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.25rem;"><i
+                                        class="fa-solid fa-plus"></i> Add Spec</button>
+                            </label>
+                            <div id="specsContainer"
+                                style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem;">
+                                <!-- Dynamic specification rows inserted here -->
+                            </div>
+                        </div>
+
+                        <!-- Image upload drag and drop -->
+                        <div class="form-group">
+                            <label>Product Images</label>
+                            <input type="file" id="prodImages" multiple accept="image/*" style="display: none;">
+                            <div class="image-upload-dropzone" id="dropzoneContainer">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <span class="dropzone-prompt">Drag & drop images here or click to browse</span>
+                                <span class="dropzone-subtext">Supports PNG, JPG, JPEG (Max 3 images)</span>
+                            </div>
+                            <!-- Preview Thumbnails -->
+                            <div class="preview-thumbnails" id="thumbnailPreviewContainer"></div>
+                        </div>
+
+                        <!-- Checkbox Grid for Flags -->
+                        <div class="form-group">
+                            <label>Storefront Attributes</label>
+                            <div class="checkbox-group-grid">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="flagFeatured">
+                                    <span class="custom-checkbox"></span>
+                                    Featured Product
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="flagNewArrival">
+                                    <span class="custom-checkbox"></span>
+                                    New Arrival
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="flagBestSeller">
+                                    <span class="custom-checkbox"></span>
+                                    Best Seller
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="flagTrending">
+                                    <span class="custom-checkbox"></span>
+                                    Trending Product
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="flagInStock" checked>
+                                    <span class="custom-checkbox"></span>
+                                    In Stock
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Actions Buttons -->
+                        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                            <button type="submit" class="btn btn-primary" id="btnSubmitForm" style="flex: 1;">Save
+                                Product</button>
+                            <button type="button" class="btn btn-secondary" id="btnCancelEditForm"
+                                style="display: none; flex: 0.5;">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tab Panel: Client Directory -->
+            <div id="tabPanelClients" class="tab-panel" style="display: none;">
+                <!-- Registered Accounts Directory -->
+                <div class="owner-table-wrapper" style="margin-top: 0;">
+                    <h3 style="display: flex; align-items: center;"><i class="fa-solid fa-users"
+                            style="margin-right: 0.5rem; color: var(--color-accent-gold);"></i>
+                        Registered Client Accounts <span class="admin-badge" id="registeredClientsCount"
+                            style="margin-left: 0.5rem; background: var(--color-bg-light); border: var(--border-luxury); color: var(--color-accent-gold-hover); font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600;">0</span>
+                    </h3>
+                    <table class="owner-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">S.No</th>
+                                <th>Client Name</th>
+                                <th>Email Address</th>
+                                <th>Phone Number</th>
+                                <th>Created Date</th>
+                                <th>Account Password</th>
+                                <th>Elite Status</th>
+                                <th>Toggle Elite</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ownerAccountsBody">
+                            <!-- Dynamic Table Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Panel: Manage Collections -->
+            <div id="tabPanelCollections" class="tab-panel" style="display: none;">
+                <div class="collections-management-layout"
+                    style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 2rem; align-items: start;">
+                    <!-- Left: List of Collections -->
+                    <div class="owner-table-wrapper" style="margin-top: 0;">
+                        <h3 style="display: flex; align-items: center;"><i class="fa-solid fa-layer-group"
+                                style="margin-right: 0.5rem; color: var(--color-accent-gold);"></i> Storefront
+                            Collections <span class="admin-badge" id="storefrontCollectionsCount"
+                                style="margin-left: 0.5rem; background: var(--color-bg-light); border: var(--border-luxury); color: var(--color-accent-gold-hover); font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600;">0</span>
+                        </h3>
+                        <table class="owner-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>Collection Info</th>
+                                    <th>Category Mapping</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="collectionsTableBody">
+                                <!-- Dynamic rows of collections -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Right: Add/Edit Collection Form -->
+                    <div class="inventory-form-column" style="margin: 0; position: static; max-width: 100%;">
+                        <div class="inventory-form-header">
+                            <h3 id="collectionFormTitleText"><i class="fa-solid fa-circle-plus"
+                                    style="color: var(--color-accent-gold);"></i> Add Collection</h3>
+                            <p id="collectionFormSubTitleText">Create a new collection theme for the shop.</p>
+                        </div>
+                        <form id="collectionForm" style="display: flex; flex-direction: column; gap: 1.25rem;">
+                            <input type="hidden" id="formCollectionId" value="">
+                            <div class="form-group">
+                                <label for="collTitle">Collection Title</label>
+                                <input type="text" id="collTitle" required placeholder="e.g. Eternity Rings">
+                            </div>
+                            <div class="form-group">
+                                <label for="collSubtitle">Description / Subtitle</label>
+                                <input type="text" id="collSubtitle" required
+                                    placeholder="e.g. Brilliant solitaires & diamond eternity bands">
+                            </div>
+                            <div class="form-group">
+                                <label for="collCategory"
+                                    style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                    <span>Category Link</span>
+                                    <button type="button" onclick="promptAddNewCategory()"
+                                        style="background: none; border: none; color: var(--color-accent-gold-hover); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; font-weight: 600; padding: 0; display: inline-flex; align-items: center; gap: 0.25rem;"><i
+                                            class="fa-solid fa-plus"></i> Add New</button>
+                                </label>
+                                <select id="collCategory" required class="select-input"
+                                    style="padding: 0.85rem 1.75rem 0.85rem 1rem; width: 100%;">
+                                    <option value="Rings">Rings</option>
+                                    <option value="Necklaces">Necklaces</option>
+                                    <option value="Earrings">Earrings</option>
+                                    <option value="Bracelets">Bracelets</option>
+                                    <option value="Bangles">Bangles</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Collection Cover Image</label>
+                                <input type="file" id="collImage" accept="image/*" style="display: none;">
+                                <div class="image-upload-dropzone" id="collDropzoneContainer">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    <span class="dropzone-prompt">Drag & drop image here or click to browse</span>
+                                </div>
+                                <div class="preview-thumbnails" id="collThumbnailPreviewContainer"></div>
+                            </div>
+
+                            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                                <button type="submit" class="btn btn-primary" id="btnSubmitCollectionForm"
+                                    style="flex: 1;">Save Collection</button>
+                                <button type="button" class="btn btn-secondary" id="btnCancelCollectionEdit"
+                                    style="display: none; flex: 0.5;">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1.5rem; margin-top: 2rem;">
+                <button class="btn btn-secondary" id="seedOwnerBtn">Reset/Re-seed Demo Customers</button>
+                <button class="btn btn-primary" id="refreshOwnerBtn">Refresh Data</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Real-time Admin Alert Container -->
+    <div id="adminAlertContainer" class="admin-alert-container"></div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast">
+        <span id="toastMessage">Records refreshed</span>
+        <button class="close-toast-btn" id="closeToastBtn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Script file -->
+    <script src="owner.js"></script>
+</body>
+
+</html>
