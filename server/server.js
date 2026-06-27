@@ -98,7 +98,7 @@ app.use((req, res, next) => {
 app.get('/admin-gate', (req, res) => {
   const { key } = req.query;
   if (key === 'aura2026') {
-    res.cookie('adminAccessAllowed', 'true', { httpOnly: true, maxAge: 5 * 60 * 1000 });
+    res.cookie('adminAccessAllowed', 'true', { httpOnly: true, maxAge: 10 * 60 * 1000 });
     return res.redirect('/owner.html');
   }
   res.status(404).send('Not Found');
@@ -848,7 +848,7 @@ app.delete('/api/products/:id', requireAuth, async (req, res) => {
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
   if (username === 'sbljewellery@gmail.com' && password === 'aura2026') {
-    res.cookie('ownerAuth', 'true', { httpOnly: true, maxAge: 5 * 60 * 1000 });
+    res.cookie('ownerAuth', 'true', { httpOnly: true, maxAge: 10 * 60 * 1000 });
     return res.json({ message: 'Login successful' });
   }
   res.status(401).json({ message: 'Invalid credentials' });
