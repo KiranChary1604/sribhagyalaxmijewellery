@@ -16,6 +16,31 @@ const GOLD_RATE_CACHE_TTL = 60000; // 1 minute in milliseconds
 const app = express();
 const PORT = process.env.PORT || 5500; // same port as static server for simplicity
 
+// Track blocked IP addresses for device lockout (24 hours)
+const blockedIPs = new Map();
+
+// Middleware to block requests from blocked IPs or blocked cookies
+function checkBlocked(req, res, next) {
+  // 1. Check if blocked cookie is present
+  if (req.cookies && req.cookies.adminBlocked === 'true') {
+    return res.status(403).json({ message: 'Access Denied: This device is temporarily blocked for 24 hours due to incorrect login credentials.' });
+  }
+
+  // 2. Check IP address
+  const clientIP = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  if (blockedIPs.has(clientIP)) {
+    const blockUntil = blockedIPs.get(clientIP);
+    if (Date.now() < blockUntil) {
+      const remainingHours = Math.ceil((blockUntil - Date.now()) / (60 * 60 * 1000));
+      return res.status(403).json({ message: `Access Denied: This device is temporarily blocked for 24 hours. Try again in ${remainingHours} hour(s).` });
+    } else {
+      // Block expired
+      blockedIPs.delete(clientIP);
+    }
+  }
+  next();
+}
+
 // Middleware
 app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json({ limit: '50mb' }));
@@ -86,6 +111,16 @@ async function saveBase64Image(base64Data, filenamePrefix, index) {
 app.use((req, res, next) => {
   const urlPath = req.path.toLowerCase();
   if (urlPath.includes('/owner.html') || urlPath.includes('/owner.js') || urlPath === '/owner' || urlPath === '/owner/') {
+    // 1. Check if device is blocked
+    const clientIP = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const isCookieBlocked = req.cookies && req.cookies.adminBlocked === 'true';
+    const isIPBlocked = blockedIPs.has(clientIP) && (Date.now() < blockedIPs.get(clientIP));
+    
+    if (isCookieBlocked || isIPBlocked) {
+      return res.status(403).send('Access Denied: This device is temporarily blocked for 24 hours.');
+    }
+
+    // 2. Check secret gate
     const isGatePassed = req.cookies && (req.cookies.adminAccessAllowed === 'true' || req.cookies.ownerAuth === 'true');
     if (!isGatePassed) {
       return res.status(404).send('Not Found');
@@ -95,7 +130,7 @@ app.use((req, res, next) => {
 });
 
 // Secret gate to access the owner portal
-app.get('/admin-gate', (req, res) => {
+app.get('/admin-gate', checkBlocked, (req, res) => {
   const { key } = req.query;
   if (key === 'aura2026') {
     res.cookie('adminAccessAllowed', 'true', { httpOnly: true, maxAge: 10 * 60 * 1000 });
@@ -845,13 +880,19 @@ app.delete('/api/products/:id', requireAuth, async (req, res) => {
 });
 
 // Endpoint to set auth cookie after owner login
-app.post('/api/login', (req, res) => {
+app.post('/api/login', checkBlocked, (req, res) => {
   const { username, password } = req.body;
   if (username === 'sbljewellery@gmail.com' && password === 'aura2026') {
     res.cookie('ownerAuth', 'true', { httpOnly: true, maxAge: 10 * 60 * 1000 });
     return res.json({ message: 'Login successful' });
   }
-  res.status(401).json({ message: 'Invalid credentials' });
+
+  // Failed attempt: block the device for 1 day (24 hours)
+  const clientIP = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  blockedIPs.set(clientIP, Date.now() + 24 * 60 * 60 * 1000);
+  res.cookie('adminBlocked', 'true', { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+
+  res.status(403).json({ message: 'Access Denied: This device has been blocked for 24 hours due to incorrect login credentials.' });
 });
 
 // Check if owner is authenticated
