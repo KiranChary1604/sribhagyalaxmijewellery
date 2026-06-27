@@ -69,6 +69,7 @@ window.switchTab = function (tabId) {
 };
 
 const initDashboard = async () => {
+    startPageOpenTimer();
     await checkAdminAuth();
     setupEventListeners();
 
@@ -154,8 +155,9 @@ async function logoutAdmin(reason = "Logged out from SBL admin portal.") {
         absoluteTimeoutId = null;
     }
 
-    await checkAdminAuth();
-    showToast(reason);
+    localStorage.removeItem('aura_owner_login_time');
+    sessionStorage.removeItem('aura_owner_page_opened_time');
+    window.location.href = '/owner.html';
 }
 
 function resetInactivityTimer() {
@@ -195,6 +197,33 @@ function startAbsoluteSessionTimer() {
                 logoutAdmin("Session expired (5 minutes limit reached).");
             }, remaining);
         }
+    }
+}
+
+let pageOpenTimeoutId = null;
+function startPageOpenTimer() {
+    const PAGE_OPENED_TIME_KEY = 'aura_owner_page_opened_time';
+    let openedTime = sessionStorage.getItem(PAGE_OPENED_TIME_KEY);
+    if (!openedTime) {
+        openedTime = Date.now().toString();
+        sessionStorage.setItem(PAGE_OPENED_TIME_KEY, openedTime);
+    }
+
+    const elapsed = Date.now() - parseInt(openedTime, 10);
+    const limit = 5 * 60 * 1000; // 5 minutes
+
+    if (elapsed >= limit) {
+        sessionStorage.removeItem(PAGE_OPENED_TIME_KEY);
+        localStorage.removeItem('aura_owner_login_time');
+        window.location.href = '/owner.html';
+    } else {
+        const remaining = limit - elapsed;
+        if (pageOpenTimeoutId) clearTimeout(pageOpenTimeoutId);
+        pageOpenTimeoutId = setTimeout(() => {
+            sessionStorage.removeItem(PAGE_OPENED_TIME_KEY);
+            localStorage.removeItem('aura_owner_login_time');
+            window.location.href = '/owner.html';
+        }, remaining);
     }
 }
 
