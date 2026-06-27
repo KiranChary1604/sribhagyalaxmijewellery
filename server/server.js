@@ -65,16 +65,21 @@ async function saveBase64Image(base64Data, filenamePrefix, index) {
   }
   
   // Fallback to local uploads directory
-  const uploadsDir = path.join(__dirname, '..', 'assets', 'uploads');
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
+  try {
+    const uploadsDir = path.join(__dirname, '..', 'assets', 'uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+    
+    const relativePath = `assets/uploads/${filename}`;
+    const absolutePath = path.join(uploadsDir, filename);
+    
+    fs.writeFileSync(absolutePath, buffer);
+    return relativePath;
+  } catch (err) {
+    console.warn("Failed to save image to disk (read-only filesystem?), falling back to storing base64 URL directly:", err.message);
+    return base64Data;
   }
-  
-  const relativePath = `assets/uploads/${filename}`;
-  const absolutePath = path.join(uploadsDir, filename);
-  
-  fs.writeFileSync(absolutePath, buffer);
-  return relativePath;
 }
 
 // Intercept owner dashboard files to hide them from normal customers
