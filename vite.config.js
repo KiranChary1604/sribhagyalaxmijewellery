@@ -19,7 +19,7 @@ function copyAssetsPlugin() {
 
 export default defineConfig({
   plugins: [copyAssetsPlugin()],
-  base: process.env.VITE_BASE_PATH || "/sribhagyalaxmijewellery"
+  base: process.env.VITE_BASE_PATH || "/sribhagyalaxmijewellery",
   build: {
     outDir: 'dist',
     emptyOutDir: true,
