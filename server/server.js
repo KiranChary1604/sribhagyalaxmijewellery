@@ -100,7 +100,11 @@ app.get('/admin-gate', (req, res) => {
 });
 
 // Serve static files (the front‑end)
-app.use(express.static(path.join(__dirname, '..')));
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../dist')));
+} else {
+  app.use(express.static(path.join(__dirname, '..')));
+}
 
 // Simple auth check – owner must have a cookie `ownerAuth=true`
 function requireAuth(req, res, next) {

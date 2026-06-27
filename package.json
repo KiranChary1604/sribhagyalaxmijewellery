@@ -4,7 +4,10 @@
   "description": "Static jewellery site with a Node/Express backend for owner dashboard",
   "main": "server/server.js",
   "scripts": {
-    "dev": "node server/server.js",
+    "dev:backend": "node server/server.js",
+    "dev:frontend": "vite",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build": "vite build",
     "start": "node server/server.js"
   },
   "author": "",
@@ -20,6 +23,7 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.0",
-    "http-server": "^14.1.1"
+    "http-server": "^14.1.1",
+    "vite": "^8.1.0"
   }
 }
