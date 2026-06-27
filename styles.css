@@ -2586,6 +2586,8 @@ img {
     font-weight: 500;
     color: var(--color-accent-gold-hover);
     margin-bottom: 0.15rem;
+    word-break: break-all;
+    overflow-wrap: break-word;
 }
 
 .contact-sub {
@@ -2808,6 +2810,11 @@ img {
     .product-add-bag-link {
         font-size: 0.65rem;
         letter-spacing: 0.05em;
+    }
+
+    .contact-info-card {
+        padding: 1.5rem;
+        gap: 1.5rem;
     }
 }
 
