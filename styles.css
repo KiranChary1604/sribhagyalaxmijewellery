@@ -67,6 +67,10 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+body.modal-open {
+    overflow: hidden;
+}
+
 /* Typography */
 h1,
 h2,

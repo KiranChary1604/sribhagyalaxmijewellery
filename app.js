@@ -2105,6 +2105,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 { scale: 1, opacity: 1, duration: 1.2, delay: 0.5, ease: "back.out(1.7)" }
             );
         }
+
+        // Auto body scroll lock observer
+        const modalObserver = new MutationObserver((mutations) => {
+            let anyActive = false;
+            document.querySelectorAll('.modal-overlay, #cartOverlay').forEach(el => {
+                if (el.classList.contains('active')) {
+                    anyActive = true;
+                }
+            });
+            if (anyActive) {
+                document.body.classList.add('modal-open');
+            } else {
+                document.body.classList.remove('modal-open');
+            }
+        });
+
+        document.querySelectorAll('.modal-overlay, #cartOverlay').forEach(el => {
+            modalObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
+        });
     }
 });
 
