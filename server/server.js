@@ -82,26 +82,9 @@ async function saveBase64Image(base64Data, filenamePrefix, index) {
   }
 }
 
-// Intercept owner dashboard files to hide them from normal customers
-app.use((req, res, next) => {
-  const urlPath = req.path.toLowerCase();
-  if (urlPath === '/owner.html' || urlPath === '/owner.js') {
-    const isGatePassed = req.cookies && (req.cookies.adminAccessAllowed === 'true' || req.cookies.ownerAuth === 'true');
-    if (!isGatePassed) {
-      return res.status(404).send('Not Found');
-    }
-  }
-  next();
-});
-
-// Secret gate to access the owner portal
-app.get('/admin-gate', (req, res) => {
-  const { key } = req.query;
-  if (key === 'aura2026') {
-    res.cookie('adminAccessAllowed', 'true', { httpOnly: true, maxAge: 5 * 60 * 1000 });
-    return res.redirect('/owner.html');
-  }
-  res.status(404).send('Not Found');
+// Redirect /owner to /owner.html for user convenience
+app.get('/owner', (req, res) => {
+  res.redirect('/owner.html');
 });
 
 // Serve static files (the front‑end)
