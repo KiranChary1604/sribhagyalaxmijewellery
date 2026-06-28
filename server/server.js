@@ -199,31 +199,17 @@ app.use((req, res, next) => {
   const isIPBlocked = blockedIPs.has(clientIP) && (Date.now() < blockedIPs.get(clientIP));
   
   if (isCookieBlocked || isIPBlocked) {
-    if (urlPath.includes('/owner.html') || urlPath.includes('/owner.js') || urlPath === '/owner' || urlPath === '/owner/' || urlPath.includes('/device-verify.html') || urlPath === '/device-verify' || urlPath === '/device-verify/') {
+    if (urlPath.includes('/owner.html') || urlPath.includes('/owner.js') || urlPath === '/owner' || urlPath === '/owner/') {
       return res.status(403).send('Access Denied: This device is temporarily blocked for 24 hours.');
     }
   }
 
-  // 2. Access control check for verification page itself
-  if (urlPath.includes('/device-verify.html') || urlPath === '/device-verify' || urlPath === '/device-verify/') {
-    const isGatePassed = req.cookies && (req.cookies.adminAccessAllowed === 'true' || req.cookies.ownerAuth === 'true');
-    if (!isGatePassed) {
-      return res.status(404).send('Not Found');
-    }
-  }
-
-  // 3. Access control for main owner page/scripts
+  // 2. Access control for main owner page/scripts
   if (urlPath.includes('/owner.html') || urlPath.includes('/owner.js') || urlPath === '/owner' || urlPath === '/owner/') {
     // Check gate
     const isGatePassed = req.cookies && (req.cookies.adminAccessAllowed === 'true' || req.cookies.ownerAuth === 'true');
     if (!isGatePassed) {
       return res.status(404).send('Not Found');
-    }
-
-    // Check device authorization
-    const deviceToken = req.cookies ? req.cookies.ownerDeviceToken : null;
-    if (!verifyDeviceToken(deviceToken)) {
-      return res.redirect('/device-verify.html');
     }
   }
   next();
@@ -980,11 +966,59 @@ app.delete('/api/products/:id', requireAuth, async (req, res) => {
 });
 
 // Endpoint to set auth cookie after owner login
-app.post('/api/login', checkBlocked, (req, res) => {
+app.post('/api/login', checkBlocked, async (req, res) => {
   const { username, password } = req.body;
   if (username === 'sbljewellery@gmail.com' && password === 'aura2026') {
-    res.cookie('ownerAuth', 'true', { httpOnly: true, maxAge: 10 * 60 * 1000 });
-    return res.json({ message: 'Login successful' });
+    // Check if device is trusted
+    const deviceToken = req.cookies ? req.cookies.ownerDeviceToken : null;
+    const isDeviceTrusted = verifyDeviceToken(deviceToken);
+    
+    if (isDeviceTrusted) {
+      res.cookie('ownerAuth', 'true', { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 10 * 60 * 1000 });
+      return res.json({ status: 'success', message: 'Login successful' });
+    }
+    
+    // Otherwise, generate and send OTP
+    try {
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const recipient = process.env.SMTP_USER || 'sribhagyalaxmijewellery@gmail.com';
+      
+      const stateToken = generateOtpStateToken(code, recipient);
+      res.cookie('ownerOtpState', stateToken, { 
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === 'production', 
+        maxAge: 5 * 60 * 1000 // 5 minutes
+      });
+
+      const htmlContent = `
+        <div style="font-family: 'Montserrat', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #e5dfd5; border-radius: 8px; background-color: #ffffff; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);">
+          <div style="text-align: center; margin-bottom: 25px;">
+            <h2 style="font-family: 'Playfair Display', Georgia, serif; color: #c5a059; margin: 0; font-size: 24px; font-weight: 500; letter-spacing: 0.05em;">SRI BHAGYA LAXMI JEWELLERY</h2>
+            <p style="color: #6e6b64; font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 5px; margin-bottom: 0;">Owner Portal Security</p>
+          </div>
+          <div style="border-top: 1px solid #e5dfd5; padding-top: 25px;">
+            <p style="color: #1c1b1a; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">A new device is requesting access to the Sri Bhagya Laxmi Jewellery House Owner Dashboard.</p>
+            <p style="color: #6e6b64; font-size: 14px; margin-bottom: 10px;">Please enter the following verification code on the authorization page:</p>
+            <div style="background-color: #faf8f5; border: 1px solid #e5dfd5; padding: 20px; border-radius: 4px; font-size: 32px; font-weight: bold; letter-spacing: 8px; text-align: center; color: #1c1b1a; margin: 25px 0; font-family: monospace;">
+              ${code}
+            </div>
+            <p style="font-size: 12px; color: #6e6b64; line-height: 1.5; margin-top: 20px;">This code is valid for 5 minutes. If you did not initiate this request, you can safely ignore this email.</p>
+          </div>
+        </div>
+      `;
+
+      await sendEmail({
+        to: recipient,
+        subject: 'SBL Owner Portal - Device Authorization Code',
+        text: `SBL Owner Dashboard Device Authorization Code: ${code} (Valid for 5 minutes)`,
+        html: htmlContent
+      });
+
+      return res.json({ status: 'otp_required', message: 'Verification code sent to registered owner email.' });
+    } catch (err) {
+      console.error("Error sending device login verification code:", err);
+      return res.status(500).json({ message: 'Failed to send verification code: ' + err.message });
+    }
   }
 
   // Failed attempt: block the device for 1 day (24 hours)
@@ -1007,54 +1041,8 @@ app.post('/api/logout', (req, res) => {
   res.json({ message: 'Logged out successfully' });
 });
 
-// Device Authorization - Send Code API
-app.post('/api/device-send-code', requireGate, async (req, res) => {
-  try {
-    // Generate a secure 6-digit random code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const recipient = process.env.SMTP_USER || 'sribhagyalaxmijewellery@gmail.com';
-    
-    // Create state token and set cookie
-    const stateToken = generateOtpStateToken(code, recipient);
-    res.cookie('ownerOtpState', stateToken, { 
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === 'production', 
-      maxAge: 5 * 60 * 1000 // 5 minutes
-    });
-
-    const htmlContent = `
-      <div style="font-family: 'Montserrat', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #e5dfd5; border-radius: 8px; background-color: #ffffff; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);">
-        <div style="text-align: center; margin-bottom: 25px;">
-          <h2 style="font-family: 'Playfair Display', Georgia, serif; color: #c5a059; margin: 0; font-size: 24px; font-weight: 500; letter-spacing: 0.05em;">SRI BHAGYA LAXMI JEWELLERY</h2>
-          <p style="color: #6e6b64; font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 5px; margin-bottom: 0;">Owner Portal Security</p>
-        </div>
-        <div style="border-top: 1px solid #e5dfd5; padding-top: 25px;">
-          <p style="color: #1c1b1a; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">A new device is requesting access to the Sri Bhagya Laxmi Jewellery House Owner Dashboard.</p>
-          <p style="color: #6e6b64; font-size: 14px; margin-bottom: 10px;">Please enter the following verification code on the authorization page:</p>
-          <div style="background-color: #faf8f5; border: 1px solid #e5dfd5; padding: 20px; border-radius: 4px; font-size: 32px; font-weight: bold; letter-spacing: 8px; text-align: center; color: #1c1b1a; margin: 25px 0; font-family: monospace;">
-            ${code}
-          </div>
-          <p style="font-size: 12px; color: #6e6b64; line-height: 1.5; margin-top: 20px;">This code is valid for 5 minutes. If you did not initiate this request from a new device, someone may be attempting to access your dashboard. No action is required unless you share this code.</p>
-        </div>
-      </div>
-    `;
-
-    await sendEmail({
-      to: recipient,
-      subject: 'SBL Owner Portal - Device Authorization Code',
-      text: `SBL Owner Dashboard Device Authorization Code: ${code} (Valid for 5 minutes)`,
-      html: htmlContent
-    });
-
-    res.json({ message: 'Verification code sent to your registered email.' });
-  } catch (err) {
-    console.error("Error sending device verification code:", err);
-    res.status(500).json({ message: 'Failed to send verification code: ' + err.message });
-  }
-});
-
-// Device Authorization - Verify Code API
-app.post('/api/device-verify-code', requireGate, (req, res) => {
+// Device Authorization - Verify OTP API (after credentials entry)
+app.post('/api/login-verify-otp', requireGate, (req, res) => {
   const { code } = req.body;
   if (!code) {
     return res.status(400).json({ message: 'Verification code is required.' });
@@ -1073,13 +1061,75 @@ app.post('/api/device-verify-code', requireGate, (req, res) => {
       maxAge: 365 * 24 * 60 * 60 * 1000 // 1 year
     });
     
+    // Set owner session cookie (10 minutes)
+    res.cookie('ownerAuth', 'true', { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production', 
+      maxAge: 10 * 60 * 1000 
+    });
+    
     // Clear temporary OTP state cookie
     res.clearCookie('ownerOtpState');
     
-    return res.json({ success: true, message: 'Device authorized successfully.' });
+    return res.json({ status: 'success', message: 'Login successful' });
   }
 
   res.status(400).json({ message: 'Invalid or expired verification code.' });
+});
+
+// Device Authorization - Resend OTP API
+app.post('/api/login-resend-otp', requireGate, async (req, res) => {
+  const otpState = req.cookies ? req.cookies.ownerOtpState : null;
+  if (!otpState) {
+    return res.status(400).json({ message: 'No active login session found. Please enter your credentials again.' });
+  }
+
+  try {
+    const parts = otpState.split('.');
+    if (parts.length === 2) {
+      const payloadStr = Buffer.from(parts[0], 'base64').toString('utf8');
+      const payload = JSON.parse(payloadStr);
+      
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const recipient = payload.email || 'sribhagyalaxmijewellery@gmail.com';
+      
+      const newOtpToken = generateOtpStateToken(code, recipient);
+      res.cookie('ownerOtpState', newOtpToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 5 * 60 * 1000
+      });
+
+      const htmlContent = `
+        <div style="font-family: 'Montserrat', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #e5dfd5; border-radius: 8px; background-color: #ffffff; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);">
+          <div style="text-align: center; margin-bottom: 25px;">
+            <h2 style="font-family: 'Playfair Display', Georgia, serif; color: #c5a059; margin: 0; font-size: 24px; font-weight: 500; letter-spacing: 0.05em;">SRI BHAGYA LAXMI JEWELLERY</h2>
+            <p style="color: #6e6b64; font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 5px; margin-bottom: 0;">Owner Portal Security</p>
+          </div>
+          <div style="border-top: 1px solid #e5dfd5; padding-top: 25px;">
+            <p style="color: #1c1b1a; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">A new device is requesting access to the Sri Bhagya Laxmi Jewellery House Owner Dashboard.</p>
+            <p style="color: #6e6b64; font-size: 14px; margin-bottom: 10px;">Your new device verification code is:</p>
+            <div style="background-color: #faf8f5; border: 1px solid #e5dfd5; padding: 20px; border-radius: 4px; font-size: 32px; font-weight: bold; letter-spacing: 8px; text-align: center; color: #1c1b1a; margin: 25px 0; font-family: monospace;">
+              ${code}
+            </div>
+            <p style="font-size: 12px; color: #6e6b64; line-height: 1.5; margin-top: 20px;">This code is valid for 5 minutes.</p>
+          </div>
+        </div>
+      `;
+
+      await sendEmail({
+        to: recipient,
+        subject: 'SBL Owner Portal - New Device Authorization Code',
+        text: `SBL Owner Dashboard Device Authorization Code: ${code} (Valid for 5 minutes)`,
+        html: htmlContent
+      });
+
+      return res.json({ message: 'A new verification code has been sent to your Gmail.' });
+    }
+  } catch (err) {
+    console.error("Error resending OTP:", err);
+  }
+  res.status(400).json({ message: 'Failed to resend code. Please try logging in again.' });
 });
 
 // Customer Registration API

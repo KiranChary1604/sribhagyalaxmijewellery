@@ -41,6 +41,20 @@ const adminLoginForm = document.getElementById('adminLoginForm');
 const adminLogoutBtn = document.getElementById('adminLogoutBtn');
 const adminLoginError = document.getElementById('adminLoginError');
 
+const adminOtpForm = document.getElementById('adminOtpForm');
+const adminOtpError = document.getElementById('adminOtpError');
+const btnVerifyAdminOtp = document.getElementById('btnVerifyAdminOtp');
+const btnResendAdminOtp = document.getElementById('btnResendAdminOtp');
+const adminOtpTimerSpan = document.getElementById('adminOtpTimerSpan');
+const linkUseMasterKey = document.getElementById('linkUseMasterKey');
+
+const adminMasterForm = document.getElementById('adminMasterForm');
+const adminMasterError = document.getElementById('adminMasterError');
+const adminMasterKeyInput = document.getElementById('adminMasterKeyInput');
+const linkBackToOtp = document.getElementById('linkBackToOtp');
+const adminOtpInputs = document.querySelectorAll('.admin-otp-input');
+const btnVerifyMasterKey = document.getElementById('btnVerifyMasterKey');
+
 // 4. INITIALIZE DASHBOARD
 window.switchTab = function (tabId) {
     // Hide all tab panels
@@ -588,21 +602,207 @@ function setupEventListeners() {
                 body: JSON.stringify({ username: user, password: pass })
             });
 
+            const data = await res.json().catch(() => ({}));
+
             if (res.ok) {
-                localStorage.setItem('aura_owner_login_time', Date.now().toString());
-                adminLoginError.style.display = 'none';
-                adminLoginForm.reset();
-                await checkAdminAuth();
-                showToast("Authenticated. Welcome to SBL Admin.");
+                if (data.status === 'otp_required') {
+                    // Smooth transition to OTP form
+                    adminLoginError.style.display = 'none';
+                    adminLoginForm.style.display = 'none';
+                    adminOtpForm.style.display = 'flex';
+                    if (adminOtpInputs.length > 0) adminOtpInputs[0].focus();
+                    showToast("Credentials correct. Please verify device via OTP code.");
+                    startAdminOtpCooldown(60);
+                } else {
+                    localStorage.setItem('aura_owner_login_time', Date.now().toString());
+                    adminLoginError.style.display = 'none';
+                    adminLoginForm.reset();
+                    await checkAdminAuth();
+                    showToast("Authenticated. Welcome to SBL Admin.");
+                }
             } else {
-                const errData = await res.json().catch(() => ({}));
-                adminLoginError.textContent = errData.message || "Invalid administrative credentials. Access denied.";
+                adminLoginError.textContent = data.message || "Invalid administrative credentials. Access denied.";
                 adminLoginError.style.display = 'block';
             }
         } catch (err) {
             console.error("Login request failed:", err);
             adminLoginError.textContent = "Error connecting to authentication server.";
             adminLoginError.style.display = 'block';
+        }
+    });
+
+    // OTP Input Focus Handlers
+    adminOtpInputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            if (e.target.value.length > 0 && index < adminOtpInputs.length - 1) {
+                adminOtpInputs[index + 1].focus();
+            }
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+                adminOtpInputs[index - 1].focus();
+            }
+        });
+
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text').trim();
+            if (/^\d{6}$/.test(text)) {
+                adminOtpInputs.forEach((inp, i) => {
+                    inp.value = text[i];
+                });
+                adminOtpInputs[5].focus();
+            }
+        });
+    });
+
+    let adminOtpCooldownInterval;
+    function startAdminOtpCooldown(seconds) {
+        btnResendAdminOtp.disabled = true;
+        adminOtpTimerSpan.style.display = 'inline';
+        let remaining = seconds;
+        adminOtpTimerSpan.textContent = ` (${remaining}s)`;
+
+        clearInterval(adminOtpCooldownInterval);
+        adminOtpCooldownInterval = setInterval(() => {
+            remaining--;
+            if (remaining <= 0) {
+                clearInterval(adminOtpCooldownInterval);
+                btnResendAdminOtp.disabled = false;
+                adminOtpTimerSpan.style.display = 'none';
+            } else {
+                adminOtpTimerSpan.textContent = ` (${remaining}s)`;
+            }
+        }, 1000);
+    }
+
+    // Resend OTP click
+    btnResendAdminOtp.addEventListener('click', async () => {
+        adminOtpError.style.display = 'none';
+        btnResendAdminOtp.disabled = true;
+        const origText = btnResendAdminOtp.textContent;
+        btnResendAdminOtp.textContent = 'Resending...';
+
+        try {
+            const res = await fetch('/api/login-resend-otp', { method: 'POST' });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok) {
+                showToast(data.message || "OTP resent to your Gmail!");
+                startAdminOtpCooldown(60);
+            } else {
+                adminOtpError.textContent = data.message || "Failed to resend code.";
+                adminOtpError.style.display = 'block';
+            }
+        } catch (err) {
+            console.error("Resend OTP failed:", err);
+            adminOtpError.textContent = "Connection error resending code.";
+            adminOtpError.style.display = 'block';
+        } finally {
+            btnResendAdminOtp.textContent = origText;
+            btnResendAdminOtp.disabled = false;
+        }
+    });
+
+    // OTP form submit
+    adminOtpForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        adminOtpError.style.display = 'none';
+        btnVerifyAdminOtp.disabled = true;
+        const origContent = btnVerifyAdminOtp.innerHTML;
+        btnVerifyAdminOtp.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
+
+        const code = Array.from(adminOtpInputs).map(inp => inp.value).join('');
+        if (code.length !== 6) {
+            adminOtpError.textContent = 'Please enter all 6 digits.';
+            adminOtpError.style.display = 'block';
+            btnVerifyAdminOtp.disabled = false;
+            btnVerifyAdminOtp.innerHTML = origContent;
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/login-verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code })
+            });
+
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.status === 'success') {
+                localStorage.setItem('aura_owner_login_time', Date.now().toString());
+                adminOtpForm.reset();
+                adminOtpForm.style.display = 'none';
+                adminLoginForm.style.display = 'flex'; // Reset visual form state for future logins
+                await checkAdminAuth();
+                showToast("Device authorized. Welcome to SBL Admin.");
+            } else {
+                adminOtpError.textContent = data.message || "Invalid or expired code.";
+                adminOtpError.style.display = 'block';
+                adminOtpInputs.forEach(inp => inp.value = '');
+                adminOtpInputs[0].focus();
+            }
+        } catch (err) {
+            console.error("OTP verification failed:", err);
+            adminOtpError.textContent = 'Connection error. Please try again.';
+            adminOtpError.style.display = 'block';
+        } finally {
+            btnVerifyAdminOtp.disabled = false;
+            btnVerifyAdminOtp.innerHTML = origContent;
+        }
+    });
+
+    // Master Key toggling & submission
+    linkUseMasterKey.addEventListener('click', () => {
+        adminOtpForm.style.display = 'none';
+        adminMasterForm.style.display = 'flex';
+        adminMasterKeyInput.focus();
+    });
+
+    linkBackToOtp.addEventListener('click', () => {
+        adminMasterForm.style.display = 'none';
+        adminOtpForm.style.display = 'flex';
+        adminOtpInputs[0].focus();
+    });
+
+    adminMasterForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        adminMasterError.style.display = 'none';
+        const key = adminMasterKeyInput.value.trim();
+        if (!key) return;
+
+        btnVerifyMasterKey.disabled = true;
+        const origContent = btnVerifyMasterKey.innerHTML;
+        btnVerifyMasterKey.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
+
+        try {
+            const res = await fetch('/api/login-verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: key })
+            });
+
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.status === 'success') {
+                localStorage.setItem('aura_owner_login_time', Date.now().toString());
+                adminMasterForm.reset();
+                adminMasterForm.style.display = 'none';
+                adminLoginForm.style.display = 'flex'; // Reset visual form state
+                await checkAdminAuth();
+                showToast("Device authorized. Welcome to SBL Admin.");
+            } else {
+                adminMasterError.textContent = data.message || "Invalid Master Device Key.";
+                adminMasterError.style.display = 'block';
+                adminMasterKeyInput.value = '';
+                adminMasterKeyInput.focus();
+            }
+        } catch (err) {
+            console.error("Master key authorization failed:", err);
+            adminMasterError.textContent = 'Connection error. Please try again.';
+            adminMasterError.style.display = 'block';
+        } finally {
+            btnVerifyMasterKey.disabled = false;
+            btnVerifyMasterKey.innerHTML = origContent;
         }
     });
 

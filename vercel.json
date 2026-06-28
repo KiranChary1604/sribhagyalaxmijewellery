@@ -19,14 +19,6 @@
     {
       "source": "/owner.js",
       "destination": "/api/server.js"
-    },
-    {
-      "source": "/device-verify.html",
-      "destination": "/api/server.js"
-    },
-    {
-      "source": "/device-verify",
-      "destination": "/api/server.js"
     }
   ]
 }

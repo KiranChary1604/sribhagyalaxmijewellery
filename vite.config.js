@@ -28,8 +28,7 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         owner: resolve(__dirname, 'owner.html'),
         privacy: resolve(__dirname, 'privacy.html'),
-        terms: resolve(__dirname, 'terms.html'),
-        deviceVerify: resolve(__dirname, 'device-verify.html')
+        terms: resolve(__dirname, 'terms.html')
       }
     }
   },
