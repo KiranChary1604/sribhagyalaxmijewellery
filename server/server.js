@@ -5,8 +5,90 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const { db, init, seed, supabase, isConfigured } = require('./db');
 const { sendEmail } = require('./email');
+
+// Device verification HMAC-SHA256 settings
+const OWNER_DEVICE_SECRET = process.env.OWNER_DEVICE_SECRET || 'sbl-jewellery-default-device-secret-2026';
+const OWNER_DEVICE_KEY = process.env.OWNER_DEVICE_KEY || 'aura-device-secure-2026';
+
+function generateDeviceToken(deviceId) {
+  const payload = JSON.stringify({ deviceId, authorizedAt: Date.now() });
+  const signature = crypto.createHmac('sha256', OWNER_DEVICE_SECRET).update(payload).digest('hex');
+  return `${Buffer.from(payload).toString('base64')}.${signature}`;
+}
+
+function verifyDeviceToken(token) {
+  if (!token) return false;
+  const parts = token.split('.');
+  if (parts.length !== 2) return false;
+  
+  const payloadBase64 = parts[0];
+  const signature = parts[1];
+  
+  try {
+    const payloadStr = Buffer.from(payloadBase64, 'base64').toString('utf8');
+    const expectedSignature = crypto.createHmac('sha256', OWNER_DEVICE_SECRET).update(payloadStr).digest('hex');
+    
+    if (signature !== expectedSignature) return false;
+    
+    const payload = JSON.parse(payloadStr);
+    // Valid for 1 year
+    const age = Date.now() - payload.authorizedAt;
+    if (age > 365 * 24 * 60 * 60 * 1000) {
+      return false;
+    }
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+function generateOtpStateToken(code, email) {
+  const hashed = crypto.createHash('sha256').update(code).digest('hex');
+  const payload = JSON.stringify({ hashed, email, expiresAt: Date.now() + 5 * 60 * 1000 });
+  const signature = crypto.createHmac('sha256', OWNER_DEVICE_SECRET).update(payload).digest('hex');
+  return `${Buffer.from(payload).toString('base64')}.${signature}`;
+}
+
+function verifyOtpStateToken(token, inputCode) {
+  // Emergency override check first
+  if (inputCode === OWNER_DEVICE_KEY) {
+    return true;
+  }
+
+  if (!token) return false;
+  
+  const parts = token.split('.');
+  if (parts.length !== 2) return false;
+  
+  const payloadBase64 = parts[0];
+  const signature = parts[1];
+  
+  try {
+    const payloadStr = Buffer.from(payloadBase64, 'base64').toString('utf8');
+    const expectedSignature = crypto.createHmac('sha256', OWNER_DEVICE_SECRET).update(payloadStr).digest('hex');
+    
+    if (signature !== expectedSignature) return false;
+    
+    const payload = JSON.parse(payloadStr);
+    if (Date.now() > payload.expiresAt) return false; // expired
+    
+    const inputHashed = crypto.createHash('sha256').update(inputCode).digest('hex');
+    return inputHashed === payload.hashed;
+  } catch (err) {
+    return false;
+  }
+}
+
+function requireGate(req, res, next) {
+  const isGatePassed = req.cookies && (req.cookies.adminAccessAllowed === 'true' || req.cookies.ownerAuth === 'true');
+  if (!isGatePassed) {
+    return res.status(401).json({ message: 'Unauthorized: Admin gate access required.' });
+  }
+  next();
+}
 
 // Gold Rate Cache
 let goldRateCache = null;
@@ -110,20 +192,38 @@ async function saveBase64Image(base64Data, filenamePrefix, index) {
 // Intercept owner dashboard files to hide them from normal customers
 app.use((req, res, next) => {
   const urlPath = req.path.toLowerCase();
-  if (urlPath.includes('/owner.html') || urlPath.includes('/owner.js') || urlPath === '/owner' || urlPath === '/owner/') {
-    // 1. Check if device is blocked
-    const clientIP = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    const isCookieBlocked = req.cookies && req.cookies.adminBlocked === 'true';
-    const isIPBlocked = blockedIPs.has(clientIP) && (Date.now() < blockedIPs.get(clientIP));
-    
-    if (isCookieBlocked || isIPBlocked) {
+  
+  // 1. First block if client is blacklisted
+  const clientIP = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const isCookieBlocked = req.cookies && req.cookies.adminBlocked === 'true';
+  const isIPBlocked = blockedIPs.has(clientIP) && (Date.now() < blockedIPs.get(clientIP));
+  
+  if (isCookieBlocked || isIPBlocked) {
+    if (urlPath.includes('/owner.html') || urlPath.includes('/owner.js') || urlPath === '/owner' || urlPath === '/owner/' || urlPath.includes('/device-verify.html') || urlPath === '/device-verify' || urlPath === '/device-verify/') {
       return res.status(403).send('Access Denied: This device is temporarily blocked for 24 hours.');
     }
+  }
 
-    // 2. Check secret gate
+  // 2. Access control check for verification page itself
+  if (urlPath.includes('/device-verify.html') || urlPath === '/device-verify' || urlPath === '/device-verify/') {
     const isGatePassed = req.cookies && (req.cookies.adminAccessAllowed === 'true' || req.cookies.ownerAuth === 'true');
     if (!isGatePassed) {
       return res.status(404).send('Not Found');
+    }
+  }
+
+  // 3. Access control for main owner page/scripts
+  if (urlPath.includes('/owner.html') || urlPath.includes('/owner.js') || urlPath === '/owner' || urlPath === '/owner/') {
+    // Check gate
+    const isGatePassed = req.cookies && (req.cookies.adminAccessAllowed === 'true' || req.cookies.ownerAuth === 'true');
+    if (!isGatePassed) {
+      return res.status(404).send('Not Found');
+    }
+
+    // Check device authorization
+    const deviceToken = req.cookies ? req.cookies.ownerDeviceToken : null;
+    if (!verifyDeviceToken(deviceToken)) {
+      return res.redirect('/device-verify.html');
     }
   }
   next();
@@ -905,6 +1005,81 @@ app.post('/api/logout', (req, res) => {
   res.clearCookie('ownerAuth');
   res.clearCookie('adminAccessAllowed');
   res.json({ message: 'Logged out successfully' });
+});
+
+// Device Authorization - Send Code API
+app.post('/api/device-send-code', requireGate, async (req, res) => {
+  try {
+    // Generate a secure 6-digit random code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const recipient = process.env.SMTP_USER || 'sribhagyalaxmijewellery@gmail.com';
+    
+    // Create state token and set cookie
+    const stateToken = generateOtpStateToken(code, recipient);
+    res.cookie('ownerOtpState', stateToken, { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production', 
+      maxAge: 5 * 60 * 1000 // 5 minutes
+    });
+
+    const htmlContent = `
+      <div style="font-family: 'Montserrat', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #e5dfd5; border-radius: 8px; background-color: #ffffff; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);">
+        <div style="text-align: center; margin-bottom: 25px;">
+          <h2 style="font-family: 'Playfair Display', Georgia, serif; color: #c5a059; margin: 0; font-size: 24px; font-weight: 500; letter-spacing: 0.05em;">SRI BHAGYA LAXMI JEWELLERY</h2>
+          <p style="color: #6e6b64; font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 5px; margin-bottom: 0;">Owner Portal Security</p>
+        </div>
+        <div style="border-top: 1px solid #e5dfd5; padding-top: 25px;">
+          <p style="color: #1c1b1a; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">A new device is requesting access to the Sri Bhagya Laxmi Jewellery House Owner Dashboard.</p>
+          <p style="color: #6e6b64; font-size: 14px; margin-bottom: 10px;">Please enter the following verification code on the authorization page:</p>
+          <div style="background-color: #faf8f5; border: 1px solid #e5dfd5; padding: 20px; border-radius: 4px; font-size: 32px; font-weight: bold; letter-spacing: 8px; text-align: center; color: #1c1b1a; margin: 25px 0; font-family: monospace;">
+            ${code}
+          </div>
+          <p style="font-size: 12px; color: #6e6b64; line-height: 1.5; margin-top: 20px;">This code is valid for 5 minutes. If you did not initiate this request from a new device, someone may be attempting to access your dashboard. No action is required unless you share this code.</p>
+        </div>
+      </div>
+    `;
+
+    await sendEmail({
+      to: recipient,
+      subject: 'SBL Owner Portal - Device Authorization Code',
+      text: `SBL Owner Dashboard Device Authorization Code: ${code} (Valid for 5 minutes)`,
+      html: htmlContent
+    });
+
+    res.json({ message: 'Verification code sent to your registered email.' });
+  } catch (err) {
+    console.error("Error sending device verification code:", err);
+    res.status(500).json({ message: 'Failed to send verification code: ' + err.message });
+  }
+});
+
+// Device Authorization - Verify Code API
+app.post('/api/device-verify-code', requireGate, (req, res) => {
+  const { code } = req.body;
+  if (!code) {
+    return res.status(400).json({ message: 'Verification code is required.' });
+  }
+
+  const otpState = req.cookies ? req.cookies.ownerOtpState : null;
+  const isValid = verifyOtpStateToken(otpState, code);
+
+  if (isValid) {
+    // Generate and set device authorization token (1 year)
+    const deviceId = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
+    const deviceToken = generateDeviceToken(deviceId);
+    res.cookie('ownerDeviceToken', deviceToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 365 * 24 * 60 * 60 * 1000 // 1 year
+    });
+    
+    // Clear temporary OTP state cookie
+    res.clearCookie('ownerOtpState');
+    
+    return res.json({ success: true, message: 'Device authorized successfully.' });
+  }
+
+  res.status(400).json({ message: 'Invalid or expired verification code.' });
 });
 
 // Customer Registration API

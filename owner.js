@@ -15,6 +15,7 @@ let editingProductId = null;
 let editingCollectionId = null;
 let inactivityTimeoutId = null;
 let absoluteTimeoutId = null;
+let pageOpenTimeoutId = null;
 let lastMaxLogId = -1;
 let logPollingIntervalId = null;
 let currentIsLoggedIn = false;
@@ -200,7 +201,6 @@ function startAbsoluteSessionTimer() {
     }
 }
 
-let pageOpenTimeoutId = null;
 function startPageOpenTimer() {
     const PAGE_OPENED_TIME_KEY = 'aura_owner_page_opened_time';
     let openedTime = sessionStorage.getItem(PAGE_OPENED_TIME_KEY);

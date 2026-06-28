@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRI BHAGYA LAXMI JEWELLERY | Device Authorization</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Shared design system styles -->
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-color: var(--color-bg-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1.5rem;
+        }
+
+        .auth-card {
+            background: var(--color-bg-white);
+            border: var(--border-luxury);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--box-shadow-premium);
+            max-width: 450px;
+            width: 100%;
+            padding: 3rem;
+            text-align: center;
+            transition: var(--transition-smooth);
+        }
+
+        .auth-logo-container {
+            margin-bottom: 2rem;
+        }
+
+        .auth-logo-img {
+            max-height: 60px;
+            margin-bottom: 1rem;
+        }
+
+        .auth-title {
+            font-family: var(--heading-font);
+            font-size: 1.5rem;
+            letter-spacing: 0.12em;
+            color: var(--color-text-dark);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .auth-subtitle {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            margin-bottom: 2.5rem;
+            line-height: 1.5;
+        }
+
+        .form-section {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+            animation: fadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .form-section.active {
+            display: flex;
+        }
+
+        .input-otp-group {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+
+        .otp-input {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            border: 1px solid #ede8e0;
+            border-radius: var(--border-radius-sm);
+            background-color: var(--color-bg-light);
+            color: var(--color-text-dark);
+            outline: none;
+            transition: var(--transition-fast);
+        }
+
+        .otp-input:focus {
+            border-color: var(--color-accent-gold);
+            background-color: var(--color-bg-white);
+            box-shadow: 0 0 0 2px var(--color-accent-gold-light);
+        }
+
+        .btn-submit {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.85rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .alert-error {
+            background-color: #fdf3f3;
+            border: 1px solid #f5c2c2;
+            color: #d13b3b;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.8rem;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            text-align: left;
+            line-height: 1.4;
+        }
+
+        .cooldown-text {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+            margin-top: 1rem;
+        }
+
+        .resend-btn {
+            color: var(--color-accent-gold);
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            background: none;
+            padding: 0;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .resend-btn:disabled {
+            color: var(--color-text-muted);
+            cursor: not-allowed;
+            font-weight: 400;
+        }
+
+        .success-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: var(--color-accent-gold);
+        }
+
+        .fallback-input-container {
+            margin-top: 1rem;
+            border-top: 1px solid #ede8e0;
+            padding-top: 1.5rem;
+        }
+
+        .fallback-link {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/logo_light.png">
+</head>
+
+<body>
+
+    <div class="auth-card">
+        <div class="auth-logo-container">
+            <a href="index.html">
+                <img src="assets/logo_light.png" alt="Sri Bhagya Laxmi Jewellery Logo" class="auth-logo-img">
+            </a>
+            <h1 class="auth-title">SRI BHAGYA LAXMI JEWELLERY</h1>
+            <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--color-accent-gold); font-weight: 600; margin-top: 0.25rem;">Security Portal</p>
+        </div>
+
+        <!-- STATE 1: REQUEST OTP -->
+        <div class="form-section active" id="sectionRequest">
+            <h3 style="font-family: var(--heading-font); font-size: 1.15rem; color: var(--color-text-dark); margin-bottom: 0.5rem;">Device Verification Required</h3>
+            <p style="font-size: 0.8rem; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 1.5rem;">
+                This device is not authorized to access the Administrative Owner Portal. For security, we must verify your identity.
+            </p>
+            
+            <div class="alert-error" id="requestError"></div>
+
+            <button type="button" class="btn btn-primary btn-submit" id="btnRequestCode">
+                <i class="fa-solid fa-paper-plane"></i> Send Verification Code
+            </button>
+            
+            <div class="fallback-input-container">
+                <span class="fallback-link" id="linkMasterKey">Use Master Override Key</span>
+            </div>
+        </div>
+
+        <!-- STATE 2: ENTER OTP -->
+        <div class="form-section" id="sectionVerify">
+            <h3 style="font-family: var(--heading-font); font-size: 1.15rem; color: var(--color-text-dark); margin-bottom: 0.5rem;">Verify Your Device</h3>
+            <p style="font-size: 0.8rem; color: var(--color-text-muted); line-height: 1.6;" id="verifyPrompt">
+                Enter the 6-digit code sent to your registered owner email.
+            </p>
+
+            <div class="alert-error" id="verifyError" style="margin-top: 1rem;"></div>
+
+            <form id="verifyForm">
+                <div class="input-otp-group" id="otpGroup">
+                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-submit" id="btnVerifyCode" style="margin-top: 1rem;">
+                    <i class="fa-solid fa-shield-halved"></i> Authorize Device
+                </button>
+            </form>
+
+            <div class="cooldown-text">
+                Didn't get the code? <button type="button" class="resend-btn" id="btnResend" disabled>Resend Code</button><span id="timerSpan"> (60s)</span>
+            </div>
+            
+            <div style="margin-top: 1.5rem; font-size: 0.75rem;">
+                <span class="fallback-link" id="linkBackToRequest" style="color: var(--color-text-muted);">Back to Request Screen</span>
+            </div>
+        </div>
+
+        <!-- STATE 3: MASTER KEY INPUT -->
+        <div class="form-section" id="sectionMasterKey">
+            <h3 style="font-family: var(--heading-font); font-size: 1.15rem; color: var(--color-text-dark); margin-bottom: 0.5rem;">Master Key Authorization</h3>
+            <p style="font-size: 0.8rem; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 1rem;">
+                Authorize this device immediately using the pre-configured system-wide Master Device Key.
+            </p>
+
+            <div class="alert-error" id="masterError" style="margin-top: 0.5rem; margin-bottom: 1rem;"></div>
+
+            <form id="masterForm" style="display: flex; flex-direction: column; gap: 1rem;">
+                <div class="form-group" style="text-align: left;">
+                    <label for="masterKey" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">Master Key</label>
+                    <input type="password" id="masterKey" required placeholder="Enter device security key" style="width: 100%; padding: 0.75rem; border: 1px solid #ede8e0; border-radius: var(--border-radius-sm); outline: none; background-color: var(--color-bg-light);">
+                </div>
+                <button type="submit" class="btn btn-primary btn-submit" id="btnSubmitMaster">
+                    <i class="fa-solid fa-key"></i> Verify Master Key
+                </button>
+            </form>
+            
+            <div style="margin-top: 1.5rem; font-size: 0.75rem;">
+                <span class="fallback-link" id="linkBackFromMaster" style="color: var(--color-text-muted);">Cancel and Return</span>
+            </div>
+        </div>
+
+        <!-- STATE 4: SUCCESS STATE -->
+        <div class="success-state" id="successState">
+            <i class="fa-solid fa-circle-check success-icon"></i>
+            <div>
+                <h3 style="font-family: var(--heading-font); font-size: 1.25rem; color: var(--color-text-dark); margin-bottom: 0.5rem;">Device Authorized</h3>
+                <p style="font-size: 0.8rem; color: var(--color-text-muted); line-height: 1.5;">This device has been successfully registered. Accessing portal...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast" style="display: none; position: fixed; bottom: 2rem; right: 2rem; background: var(--color-bg-dark); color: var(--color-text-light); padding: 1rem 1.5rem; border-radius: var(--border-radius-sm); box-shadow: var(--box-shadow-premium); font-size: 0.85rem; z-index: 1000; align-items: center; gap: 0.75rem;">
+        <i class="fa-solid fa-circle-info" style="color: var(--color-accent-gold);"></i>
+        <span id="toastMessage">Verification code sent!</span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sectionRequest = document.getElementById('sectionRequest');
+            const sectionVerify = document.getElementById('sectionVerify');
+            const sectionMasterKey = document.getElementById('sectionMasterKey');
+            const successState = document.getElementById('successState');
+            
+            const btnRequestCode = document.getElementById('btnRequestCode');
+            const btnResend = document.getElementById('btnResend');
+            const btnVerifyCode = document.getElementById('btnVerifyCode');
+            
+            const requestError = document.getElementById('requestError');
+            const verifyError = document.getElementById('verifyError');
+            const masterError = document.getElementById('masterError');
+            
+            const verifyForm = document.getElementById('verifyForm');
+            const masterForm = document.getElementById('masterForm');
+            
+            const otpInputs = document.querySelectorAll('.otp-input');
+            const timerSpan = document.getElementById('timerSpan');
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+
+            const linkMasterKey = document.getElementById('linkMasterKey');
+            const linkBackToRequest = document.getElementById('linkBackToRequest');
+            const linkBackFromMaster = document.getElementById('linkBackFromMaster');
+            const masterKeyInput = document.getElementById('masterKey');
+
+            let timerInterval;
+
+            // Helper to show/hide sections
+            function showSection(section) {
+                [sectionRequest, sectionVerify, sectionMasterKey, successState].forEach(s => {
+                    s.classList.remove('active');
+                    s.style.display = 'none';
+                });
+                section.classList.add('active');
+                if (section === successState) {
+                    section.style.display = 'flex';
+                } else {
+                    section.style.display = 'flex';
+                }
+            }
+
+            // Show toast message
+            function showToast(message) {
+                toastMessage.textContent = message;
+                toast.style.display = 'flex';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 4000);
+            }
+
+            // OTP Input Behavior
+            otpInputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    if (e.target.value.length > 0 && index < otpInputs.length - 1) {
+                        otpInputs[index + 1].focus();
+                    }
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+                        otpInputs[index - 1].focus();
+                    }
+                });
+
+                // Handle paste
+                input.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const text = (e.clipboardData || window.clipboardData).getData('text').trim();
+                    if (/^\d{6}$/.test(text)) {
+                        otpInputs.forEach((inp, i) => {
+                            inp.value = text[i];
+                        });
+                        otpInputs[5].focus();
+                    }
+                });
+            });
+
+            // Timer Cooldown for Resending
+            function startCooldown(seconds) {
+                btnResend.disabled = true;
+                timerSpan.style.display = 'inline';
+                let remaining = seconds;
+                timerSpan.textContent = ` (${remaining}s)`;
+                
+                clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    remaining--;
+                    if (remaining <= 0) {
+                        clearInterval(timerInterval);
+                        btnResend.disabled = false;
+                        timerSpan.style.display = 'none';
+                    } else {
+                        timerSpan.textContent = ` (${remaining}s)`;
+                    }
+                }, 1000);
+            }
+
+            // Route switching fallbacks
+            linkMasterKey.addEventListener('click', () => {
+                showSection(sectionMasterKey);
+                masterKeyInput.focus();
+            });
+
+            linkBackToRequest.addEventListener('click', () => {
+                showSection(sectionRequest);
+            });
+
+            linkBackFromMaster.addEventListener('click', () => {
+                showSection(sectionRequest);
+            });
+
+            // API: Request Code
+            async function requestVerificationCode(errorElement, buttonElement) {
+                errorElement.style.display = 'none';
+                buttonElement.disabled = true;
+                const origContent = buttonElement.innerHTML;
+                buttonElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+
+                try {
+                    const res = await fetch('/api/device-send-code', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    const data = await res.json();
+                    if (res.ok) {
+                        showToast(data.message || 'Verification code sent!');
+                        showSection(sectionVerify);
+                        otpInputs[0].focus();
+                        startCooldown(60);
+                    } else {
+                        errorElement.textContent = data.message || 'Failed to send verification code. Please try again.';
+                        errorElement.style.display = 'flex';
+                    }
+                } catch (err) {
+                    console.error("Network error sending code:", err);
+                    errorElement.textContent = 'Server connection error. Please ensure the backend is running.';
+                    errorElement.style.display = 'flex';
+                } finally {
+                    buttonElement.disabled = false;
+                    buttonElement.innerHTML = origContent;
+                }
+            }
+
+            btnRequestCode.addEventListener('click', () => {
+                requestVerificationCode(requestError, btnRequestCode);
+            });
+
+            btnResend.addEventListener('click', () => {
+                requestVerificationCode(verifyError, btnResend);
+            });
+
+            // API: Verify Code
+            verifyForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                verifyError.style.display = 'none';
+                btnVerifyCode.disabled = true;
+                const origContent = btnVerifyCode.innerHTML;
+                btnVerifyCode.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authorizing...';
+
+                const code = Array.from(otpInputs).map(inp => inp.value).join('');
+                if (code.length !== 6) {
+                    verifyError.textContent = 'Please enter all 6 digits.';
+                    verifyError.style.display = 'flex';
+                    btnVerifyCode.disabled = false;
+                    btnVerifyCode.innerHTML = origContent;
+                    return;
+                }
+
+                try {
+                    const res = await fetch('/api/device-verify-code', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code })
+                    });
+
+                    const data = await res.json();
+                    if (res.ok) {
+                        showSection(successState);
+                        setTimeout(() => {
+                            window.location.href = '/owner.html';
+                        }, 1500);
+                    } else {
+                        verifyError.textContent = data.message || 'Invalid or expired code.';
+                        verifyError.style.display = 'flex';
+                        // Clear inputs and refocus first input
+                        otpInputs.forEach(inp => inp.value = '');
+                        otpInputs[0].focus();
+                    }
+                } catch (err) {
+                    console.error("Network error verifying code:", err);
+                    verifyError.textContent = 'Server connection error. Please try again.';
+                    verifyError.style.display = 'flex';
+                } finally {
+                    btnVerifyCode.disabled = false;
+                    btnVerifyCode.innerHTML = origContent;
+                }
+            });
+
+            // API: Verify Master Key
+            masterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                masterError.style.display = 'none';
+                const key = masterKeyInput.value.trim();
+                if (!key) return;
+
+                const btn = document.getElementById('btnSubmitMaster');
+                btn.disabled = true;
+                const origContent = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authorizing...';
+
+                try {
+                    const res = await fetch('/api/device-verify-code', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code: key })
+                    });
+
+                    const data = await res.json();
+                    if (res.ok) {
+                        showSection(successState);
+                        setTimeout(() => {
+                            window.location.href = '/owner.html';
+                        }, 1500);
+                    } else {
+                        masterError.textContent = data.message || 'Invalid Master Device Key.';
+                        masterError.style.display = 'flex';
+                        masterKeyInput.value = '';
+                        masterKeyInput.focus();
+                    }
+                } catch (err) {
+                    console.error("Network error verifying master key:", err);
+                    masterError.textContent = 'Server connection error. Please try again.';
+                    masterError.style.display = 'flex';
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = origContent;
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
