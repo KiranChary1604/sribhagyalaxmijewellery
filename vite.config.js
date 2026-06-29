@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import fs from 'fs';
 
-// A simple plugin to copy the assets folder to dist/assets
+// A simple plugin to copy the assets folder and styles.css to dist
 function copyAssetsPlugin() {
   return {
     name: 'copy-assets',
@@ -12,6 +12,14 @@ function copyAssetsPlugin() {
       if (fs.existsSync(srcDir)) {
         fs.cpSync(srcDir, destDir, { recursive: true, force: true });
         console.log('Successfully copied assets/ to dist/assets/');
+      }
+      
+      // Copy styles.css to dist/styles.css for dynamic owner portal serving
+      const srcStyle = resolve(__dirname, 'styles.css');
+      const destStyle = resolve(__dirname, 'dist/styles.css');
+      if (fs.existsSync(srcStyle)) {
+        fs.copyFileSync(srcStyle, destStyle);
+        console.log('Successfully copied styles.css to dist/styles.css');
       }
     }
   };
