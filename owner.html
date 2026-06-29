@@ -114,37 +114,6 @@
             <div style="text-align: center; font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.5rem;">
                 Didn't get the code? <button type="button" id="btnResendAdminOtp" style="color: var(--color-accent-gold); font-weight: 600; text-decoration: none; font-size: 0.8rem; background: none; border: none; cursor: pointer; padding: 0; display: inline;">Resend</button><span id="adminOtpTimerSpan" style="display: none;"> (60s)</span>
             </div>
-
-            <div style="text-align: center; margin-top: 1rem; border-top: 1px solid #ede8e0; padding-top: 1rem;">
-                <span id="linkUseMasterKey" style="font-size: 0.75rem; color: var(--color-text-muted); text-decoration: underline; cursor: pointer;">Use Master Override Key</span>
-            </div>
-        </form>
-
-        <!-- Master Key Authorization Form -->
-        <form id="adminMasterForm" style="display: none; flex-direction: column; gap: 1.25rem; margin-top: 0;">
-            <div style="text-align: center; margin-bottom: 0.5rem;">
-                <h3 style="font-family: var(--heading-font); font-size: 1.15rem; font-weight: 500; color: var(--color-accent-gold);">
-                    Master Key Authorization</h3>
-                <p style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.25rem;">
-                    Authorize this device instantly by entering the pre-configured system-wide Master Device Key.
-                </p>
-            </div>
-
-            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.4rem;">
-                <label for="adminMasterKeyInput"
-                    style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.1rem; display: block; text-align: left;">Master Key</label>
-                <input type="password" id="adminMasterKeyInput" required placeholder="Enter security key"
-                    style="width: 100%; padding: 0.75rem; border: 1px solid #ede8e0; border-radius: var(--border-radius-sm);">
-            </div>
-
-            <span id="adminMasterError"
-                style="color: #e25c5c; font-size: 0.8rem; display: none; text-align: center; margin-top: 0.25rem;"></span>
-
-            <button type="submit" class="btn btn-primary w-full" id="btnVerifyMasterKey" style="margin-top: 0.75rem;">Authorize Device</button>
-
-            <div style="text-align: center; margin-top: 1rem; border-top: 1px solid #ede8e0; padding-top: 1rem;">
-                <span id="linkBackToOtp" style="font-size: 0.75rem; color: var(--color-text-muted); text-decoration: underline; cursor: pointer;">Back to OTP Verification</span>
-            </div>
         </form>
     </div>
 

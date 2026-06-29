@@ -46,14 +46,7 @@ const adminOtpError = document.getElementById('adminOtpError');
 const btnVerifyAdminOtp = document.getElementById('btnVerifyAdminOtp');
 const btnResendAdminOtp = document.getElementById('btnResendAdminOtp');
 const adminOtpTimerSpan = document.getElementById('adminOtpTimerSpan');
-const linkUseMasterKey = document.getElementById('linkUseMasterKey');
-
-const adminMasterForm = document.getElementById('adminMasterForm');
-const adminMasterError = document.getElementById('adminMasterError');
-const adminMasterKeyInput = document.getElementById('adminMasterKeyInput');
-const linkBackToOtp = document.getElementById('linkBackToOtp');
 const adminOtpInputs = document.querySelectorAll('.admin-otp-input');
-const btnVerifyMasterKey = document.getElementById('btnVerifyMasterKey');
 
 // 4. INITIALIZE DASHBOARD
 window.switchTab = function (tabId) {
@@ -752,59 +745,6 @@ function setupEventListeners() {
         }
     });
 
-    // Master Key toggling & submission
-    linkUseMasterKey.addEventListener('click', () => {
-        adminOtpForm.style.display = 'none';
-        adminMasterForm.style.display = 'flex';
-        adminMasterKeyInput.focus();
-    });
-
-    linkBackToOtp.addEventListener('click', () => {
-        adminMasterForm.style.display = 'none';
-        adminOtpForm.style.display = 'flex';
-        adminOtpInputs[0].focus();
-    });
-
-    adminMasterForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        adminMasterError.style.display = 'none';
-        const key = adminMasterKeyInput.value.trim();
-        if (!key) return;
-
-        btnVerifyMasterKey.disabled = true;
-        const origContent = btnVerifyMasterKey.innerHTML;
-        btnVerifyMasterKey.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
-
-        try {
-            const res = await fetch('/api/login-verify-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code: key })
-            });
-
-            const data = await res.json().catch(() => ({}));
-            if (res.ok && data.status === 'success') {
-                localStorage.setItem('aura_owner_login_time', Date.now().toString());
-                adminMasterForm.reset();
-                adminMasterForm.style.display = 'none';
-                adminLoginForm.style.display = 'flex'; // Reset visual form state
-                await checkAdminAuth();
-                showToast("Device authorized. Welcome to SBL Admin.");
-            } else {
-                adminMasterError.textContent = data.message || "Invalid Master Device Key.";
-                adminMasterError.style.display = 'block';
-                adminMasterKeyInput.value = '';
-                adminMasterKeyInput.focus();
-            }
-        } catch (err) {
-            console.error("Master key authorization failed:", err);
-            adminMasterError.textContent = 'Connection error. Please try again.';
-            adminMasterError.style.display = 'block';
-        } finally {
-            btnVerifyMasterKey.disabled = false;
-            btnVerifyMasterKey.innerHTML = origContent;
-        }
-    });
 
     // Admin Logout button click
     adminLogoutBtn.addEventListener('click', () => {

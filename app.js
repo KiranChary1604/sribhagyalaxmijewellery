@@ -599,8 +599,8 @@ function renderCollections() {
 
     grid.innerHTML = '';
     
-    // Determine collections to render based on showAllCollections flag
-    const collectionsToRender = showAllCollections ? collections : collections.slice(0, 4);
+    // Determine collections to render (show all collections by default)
+    const collectionsToRender = collections;
 
     collectionsToRender.forEach(col => {
         const card = document.createElement('div');
@@ -633,21 +633,10 @@ function renderCollections() {
         grid.appendChild(card);
     });
 
-    // Handle More Collections button state and label
+    // Hide More Collections button since all collections are rendered by default
     const actionContainer = document.getElementById('collectionsActionContainer');
-    const toggleBtn = document.getElementById('btnToggleCollections');
-    
-    if (actionContainer && toggleBtn) {
-        if (collections.length > 4) {
-            actionContainer.style.display = 'block';
-            if (showAllCollections) {
-                toggleBtn.innerHTML = `Less Collections <i class="fa-solid fa-chevron-up" style="margin-left: 0.5rem; font-size: 0.8rem;"></i>`;
-            } else {
-                toggleBtn.innerHTML = `More Collections <i class="fa-solid fa-chevron-down" style="margin-left: 0.5rem; font-size: 0.8rem;"></i>`;
-            }
-        } else {
-            actionContainer.style.display = 'none';
-        }
+    if (actionContainer) {
+        actionContainer.style.display = 'none';
     }
 }
 

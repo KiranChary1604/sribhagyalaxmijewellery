@@ -11,7 +11,6 @@ const { sendEmail } = require('./email');
 
 // Device verification HMAC-SHA256 settings
 const OWNER_DEVICE_SECRET = process.env.OWNER_DEVICE_SECRET || 'sbl-jewellery-default-device-secret-2026';
-const OWNER_DEVICE_KEY = process.env.OWNER_DEVICE_KEY || 'aura-device-secure-2026';
 
 function generateDeviceToken(deviceId) {
   const payload = JSON.stringify({ deviceId, authorizedAt: Date.now() });
@@ -53,15 +52,16 @@ function generateOtpStateToken(code, email) {
 }
 
 function verifyOtpStateToken(token, inputCode) {
-  // Emergency override check first
-  if (inputCode === OWNER_DEVICE_KEY) {
-    return true;
+  if (!token) {
+    console.log("[AUTH] verifyOtpStateToken: Failed - ownerOtpState cookie token is missing.");
+    return false;
   }
-
-  if (!token) return false;
   
   const parts = token.split('.');
-  if (parts.length !== 2) return false;
+  if (parts.length !== 2) {
+    console.log("[AUTH] verifyOtpStateToken: Failed - token parts length !== 2");
+    return false;
+  }
   
   const payloadBase64 = parts[0];
   const signature = parts[1];
@@ -70,14 +70,27 @@ function verifyOtpStateToken(token, inputCode) {
     const payloadStr = Buffer.from(payloadBase64, 'base64').toString('utf8');
     const expectedSignature = crypto.createHmac('sha256', OWNER_DEVICE_SECRET).update(payloadStr).digest('hex');
     
-    if (signature !== expectedSignature) return false;
+    if (signature !== expectedSignature) {
+      console.log("[AUTH] verifyOtpStateToken: Failed - Signature mismatch.");
+      return false;
+    }
     
     const payload = JSON.parse(payloadStr);
-    if (Date.now() > payload.expiresAt) return false; // expired
+    if (Date.now() > payload.expiresAt) {
+      console.log("[AUTH] verifyOtpStateToken: Failed - Token expired.");
+      return false;
+    }
     
     const inputHashed = crypto.createHash('sha256').update(inputCode).digest('hex');
-    return inputHashed === payload.hashed;
+    const match = inputHashed === payload.hashed;
+    if (!match) {
+      console.log(`[AUTH] verifyOtpStateToken: Failed - Hash mismatch. Input Code: ${inputCode}, Expected Hashed: ${payload.hashed}`);
+    } else {
+      console.log("[AUTH] verifyOtpStateToken: Successfully verified OTP.");
+    }
+    return match;
   } catch (err) {
+    console.log("[AUTH] verifyOtpStateToken: Exception occurred:", err);
     return false;
   }
 }
@@ -211,6 +224,17 @@ app.use((req, res, next) => {
     if (!isGatePassed) {
       return res.status(404).send('Not Found');
     }
+
+    // Serve files directly if gate is passed (to prevent bypassing authentication on static hosting like Vercel)
+    if (urlPath === '/owner' || urlPath === '/owner/') {
+      return res.redirect('/owner.html');
+    }
+    if (urlPath.includes('/owner.html')) {
+      return res.sendFile(path.resolve(__dirname, '../owner.html'));
+    }
+    if (urlPath.includes('/owner.js')) {
+      return res.sendFile(path.resolve(__dirname, '../owner.js'));
+    }
   }
   next();
 });
@@ -219,7 +243,7 @@ app.use((req, res, next) => {
 app.get('/admin-gate', checkBlocked, (req, res) => {
   const { key } = req.query;
   if (key === 'aura2026') {
-    res.cookie('adminAccessAllowed', 'true', { httpOnly: true, maxAge: 10 * 60 * 1000 });
+    res.cookie('adminAccessAllowed', 'true', { httpOnly: true, maxAge: 2 * 60 * 60 * 1000 }); // 2 hours
     return res.redirect('/owner.html');
   }
   res.status(404).send('Not Found');
@@ -969,6 +993,9 @@ app.delete('/api/products/:id', requireAuth, async (req, res) => {
 app.post('/api/login', checkBlocked, async (req, res) => {
   const { username, password } = req.body;
   if (username === 'sbljewellery@gmail.com' && password === 'aura2026') {
+    // Refresh the admin access gate cookie for 1 hour to prevent timeouts during OTP verification
+    res.cookie('adminAccessAllowed', 'true', { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 60 * 60 * 1000 });
+
     // Check if device is trusted
     const deviceToken = req.cookies ? req.cookies.ownerDeviceToken : null;
     const isDeviceTrusted = verifyDeviceToken(deviceToken);
@@ -982,6 +1009,7 @@ app.post('/api/login', checkBlocked, async (req, res) => {
     try {
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       const recipient = process.env.SMTP_USER || 'sribhagyalaxmijewellery@gmail.com';
+      console.log(`[AUTH] Generated OTP Code: ${code} for recipient: ${recipient}`);
       
       const stateToken = generateOtpStateToken(code, recipient);
       res.cookie('ownerOtpState', stateToken, { 
@@ -1049,6 +1077,7 @@ app.post('/api/login-verify-otp', requireGate, (req, res) => {
   }
 
   const otpState = req.cookies ? req.cookies.ownerOtpState : null;
+  console.log(`[AUTH] Verifying code: ${code}. Cookie present: ${!!otpState}`);
   const isValid = verifyOtpStateToken(otpState, code);
 
   if (isValid) {
@@ -1092,6 +1121,7 @@ app.post('/api/login-resend-otp', requireGate, async (req, res) => {
       
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       const recipient = payload.email || 'sribhagyalaxmijewellery@gmail.com';
+      console.log(`[AUTH] Resent OTP Code: ${code} for recipient: ${recipient}`);
       
       const newOtpToken = generateOtpStateToken(code, recipient);
       res.cookie('ownerOtpState', newOtpToken, {
